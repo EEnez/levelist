@@ -20,7 +20,7 @@ A personal video game tracking application built with Next.js, TypeScript, and T
 
 1. Clone the repository
 ```bash
-git clone https://github.com/[username]/levelist.git
+git clone https://github.com/EEnez/levelist.git
 cd levelist
 ```
 
