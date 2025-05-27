@@ -1,5 +1,9 @@
 # My Video Game Tracker
 
+![Next.js](https://img.shields.io/badge/Next.js-14+-black?style=flat-square&logo=next.js)
+![TypeScript](https://img.shields.io/badge/TypeScript-5+-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4+-38B2AC?style=flat-square&logo=tailwind-css)
+
 A personal video game tracking application built with Next.js, TypeScript, and Tailwind CSS.
 
 ## Features
