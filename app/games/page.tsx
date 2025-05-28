@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import GameCard from '@/components/GameCard/GameCard';
 import { sampleGames } from '@/components/GameCard/GameCard.stories';
-import { Game } from '@/types';
+import { Game, GameStatus } from '@/types';
 
 type ViewMode = 'grid' | 'list';
 
 export default function GamesPage() {
+  const router = useRouter();
   const [games] = useState<Game[]>(sampleGames);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
@@ -28,18 +30,18 @@ export default function GamesPage() {
   }, [games, searchTerm]);
 
   const handleEdit = (game: Game) => {
-    console.log('Edit game:', game.title);
-    // TODO: Implement edit functionality
+    router.push(`/games/${game.id}/edit`);
   };
 
   const handleDelete = (gameId: string) => {
     console.log('Delete game:', gameId);
-    // TODO: Implement delete functionality
+    if (confirm('Are you sure you want to remove this game from your collection?')) {
+      console.log('Game deleted:', gameId);
+    }
   };
 
   const handleAddGame = () => {
-    console.log('Add new game');
-    // TODO: Navigate to add game page
+    router.push('/games/add');
   };
 
   return (
@@ -176,16 +178,16 @@ export default function GamesPage() {
               ) : (
                 // List view layout
                 <div className="flex items-center space-x-4">
-                                     <div className="flex-shrink-0 w-16 h-20 bg-gray-100 rounded overflow-hidden relative">
-                                         {game.coverImageUrl ? (
-                       <Image
-                         src={game.coverImageUrl}
-                         alt={`${game.title} cover`}
-                         fill
-                         className="object-cover"
-                         sizes="64px"
-                       />
-                     ) : (
+                  <div className="flex-shrink-0 w-16 h-20 bg-gray-100 rounded overflow-hidden relative">
+                    {game.coverImageUrl ? (
+                      <Image
+                        src={game.coverImageUrl}
+                        alt={`${game.title} cover`}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    ) : (
                       <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
                         <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -199,39 +201,42 @@ export default function GamesPage() {
                       {game.genres.slice(0, 2).join(', ')} • {game.platforms.slice(0, 2).join(', ')}
                     </p>
                     <div className="flex items-center space-x-4 mt-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${
-                        game.status === 'completed' ? 'bg-green-100 text-green-800 border-green-200' :
-                        game.status === 'currently_playing' ? 'bg-blue-100 text-blue-800 border-blue-200' :
-                        game.status === 'want_to_play' ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                        game.status === 'on_hold' ? 'bg-orange-100 text-orange-800 border-orange-200' :
-                        'bg-red-100 text-red-800 border-red-200'
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                        game.status === GameStatus.COMPLETED ? 'bg-green-100 text-green-800' :
+                        game.status === GameStatus.CURRENTLY_PLAYING ? 'bg-blue-100 text-blue-800' :
+                        game.status === GameStatus.WANT_TO_PLAY ? 'bg-gray-100 text-gray-800' :
+                        game.status === GameStatus.ON_HOLD ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
                       }`}>
-                        {game.status.replace('_', ' ')}
+                        {game.status === GameStatus.COMPLETED && 'Completed'}
+                        {game.status === GameStatus.CURRENTLY_PLAYING && 'Currently Playing'}
+                        {game.status === GameStatus.WANT_TO_PLAY && 'Want to Play'}
+                        {game.status === GameStatus.ON_HOLD && 'On Hold'}
+                        {game.status === GameStatus.DROPPED && 'Dropped'}
                       </span>
                       {game.rating && (
-                        <span className="text-sm text-gray-600">⭐ {game.rating}/10</span>
-                      )}
-                      {game.hoursPlayed && (
-                        <span className="text-sm text-gray-600">{game.hoursPlayed}h</span>
+                        <span className="text-sm text-gray-600">
+                          ⭐ {game.rating}/10
+                        </span>
                       )}
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <button
                       onClick={() => handleEdit(game)}
-                      className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                      aria-label="Edit game"
+                      className="p-2 text-gray-400 hover:text-blue-600 transition-colors"
+                      title="Edit"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                       </svg>
                     </button>
                     <button
                       onClick={() => handleDelete(game.id)}
                       className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                      aria-label="Delete game"
+                      title="Delete"
                     >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                       </svg>
                     </button>
@@ -240,15 +245,6 @@ export default function GamesPage() {
               )}
             </div>
           ))}
-        </div>
-      )}
-
-      {/* Results Summary */}
-      {filteredGames.length > 0 && searchTerm && (
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-600">
-            Showing {filteredGames.length} of {games.length} games
-          </p>
         </div>
       )}
     </div>
