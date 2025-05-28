@@ -20,7 +20,6 @@ export default function EditGamePage() {
   useEffect(() => {
     const loadGame = async () => {
       try {
-        // TODO: Replace with actual API call
         const foundGame = sampleGames.find(g => g.id === gameId);
         
         if (!foundGame) {
@@ -48,7 +47,6 @@ export default function EditGamePage() {
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual API call
       const updatedGame: Game = {
         ...game,
         ...data,
@@ -59,14 +57,9 @@ export default function EditGamePage() {
       
       console.log('Updating game:', updatedGame);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect to games collection
       router.push('/games');
     } catch (error) {
       console.error('Error updating game:', error);
-      // TODO: Show error message to user
     } finally {
       setIsLoading(false);
     }

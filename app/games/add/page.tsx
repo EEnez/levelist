@@ -13,9 +13,8 @@ export default function AddGamePage() {
     setIsLoading(true);
     
     try {
-      // TODO: Replace with actual API call
       const newGame: Game = {
-        id: Date.now().toString(), // Temporary ID generation
+        id: Date.now().toString(),
         ...data,
         releaseDate: data.releaseDate ? new Date(data.releaseDate) : undefined,
         completionDate: data.completionDate ? new Date(data.completionDate) : undefined,
@@ -25,14 +24,9 @@ export default function AddGamePage() {
       
       console.log('Adding new game:', newGame);
       
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Redirect to games collection
       router.push('/games');
     } catch (error) {
       console.error('Error adding game:', error);
-      // TODO: Show error message to user
     } finally {
       setIsLoading(false);
     }

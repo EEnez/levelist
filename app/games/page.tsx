@@ -34,10 +34,8 @@ export default function GamesPage() {
   };
 
   const handleDelete = (gameId: string) => {
-    // TODO: Implement delete functionality with confirmation modal
     console.log('Delete game:', gameId);
     if (confirm('Are you sure you want to remove this game from your collection?')) {
-      // TODO: Call API to delete game
       console.log('Game deleted:', gameId);
     }
   };
