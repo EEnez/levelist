@@ -2,6 +2,7 @@
 
 import { Game, GameStatus, Genre, Platform } from '@/types';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 
 interface GameCardProps {
   game: Game;
@@ -10,6 +11,26 @@ interface GameCardProps {
 }
 
 export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/games/${game.id}`);
+  };
+
+  const handleEditClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onEdit) {
+      onEdit(game);
+    }
+  };
+
+  const handleDeleteClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      onDelete(game.id);
+    }
+  };
+
   const getStatusColor = (status: GameStatus) => {
     switch (status) {
       case GameStatus.COMPLETED:
@@ -70,7 +91,10 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 group">
+    <div 
+      className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200 group cursor-pointer"
+      onClick={handleCardClick}
+    >
       {/* Cover Image */}
       <div className="relative aspect-[3/4] bg-gray-100">
         {game.coverImageUrl ? (
@@ -110,7 +134,7 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
           <div className="flex space-x-1">
             {onEdit && (
               <button
-                onClick={() => onEdit(game)}
+                onClick={handleEditClick}
                 className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-sm transition-all duration-200 hover:scale-105"
                 aria-label="Edit game"
               >
@@ -121,7 +145,7 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
             )}
             {onDelete && (
               <button
-                onClick={() => onDelete(game.id)}
+                onClick={handleDeleteClick}
                 className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-sm transition-all duration-200 hover:scale-105"
                 aria-label="Delete game"
               >
@@ -137,7 +161,7 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
       {/* Game Info */}
       <div className="p-4">
         {/* Title */}
-        <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 leading-tight">
+        <h3 className="font-semibold text-gray-900 text-sm mb-2 line-clamp-2 leading-tight hover:text-blue-600 transition-colors">
           {game.title}
         </h3>
 
