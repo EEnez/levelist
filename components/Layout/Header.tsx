@@ -39,23 +39,17 @@ export default function Header() {
               My Games
             </Link>
             <Link 
-              href="/add" 
+              href="/games/add" 
               className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
             >
               Add Game
-            </Link>
-            <Link 
-              href="/stats" 
-              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
-            >
-              Statistics
             </Link>
           </nav>
 
           {/* Desktop CTA Button */}
           <div className="hidden md:flex items-center space-x-4">
             <Link 
-              href="/add"
+              href="/games/add"
               className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
             >
               Add Game
@@ -115,23 +109,16 @@ export default function Header() {
               My Games
             </Link>
             <Link
-              href="/add"
+              href="/games/add"
               className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Add Game
             </Link>
-            <Link
-              href="/stats"
-              className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium transition-colors"
-              onClick={() => setIsMobileMenuOpen(false)}
-            >
-              Statistics
-            </Link>
           </div>
           <div className="px-4 py-3 border-t border-gray-200">
             <Link
-              href="/add"
+              href="/games/add"
               className="block w-full bg-blue-600 text-white px-4 py-2 rounded-lg text-center font-medium hover:bg-blue-700 transition-colors"
               onClick={() => setIsMobileMenuOpen(false)}
             >
