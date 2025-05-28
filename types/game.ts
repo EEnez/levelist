@@ -3,6 +3,7 @@ import { GameStatus, Platform, Genre } from './enums';
 export interface Game {
   id: string;
   title: string;
+  description?: string;
   genres: Genre[];
   platforms: Platform[];
   status: GameStatus;
@@ -23,14 +24,16 @@ export interface Game {
 
 export interface GameFormData {
   title: string;
+  description?: string;
   genres: Genre[];
   platforms: Platform[];
   status: GameStatus;
   rating?: number;
   hoursPlayed?: number;
+  completionDate?: string; // ISO date string from form
   notes?: string;
   coverImageUrl?: string;
-  releaseDate?: Date;
+  releaseDate?: string; // ISO date string from form
   developer?: string;
   publisher?: string;
 } 
