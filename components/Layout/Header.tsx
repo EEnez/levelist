@@ -44,6 +44,12 @@ export default function Header() {
             >
               Add Game
             </Link>
+            <Link 
+              href="/statistics" 
+              className="text-gray-700 hover:text-blue-600 px-3 py-2 rounded-md text-sm font-medium transition-colors"
+            >
+              Statistics
+            </Link>
           </nav>
 
           {/* Desktop CTA Button */}
@@ -114,6 +120,13 @@ export default function Header() {
               onClick={() => setIsMobileMenuOpen(false)}
             >
               Add Game
+            </Link>
+            <Link
+              href="/statistics"
+              className="block px-3 py-2 text-gray-700 hover:text-blue-600 hover:bg-gray-50 rounded-md text-base font-medium transition-colors"
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              Statistics
             </Link>
           </div>
           <div className="px-4 py-3 border-t border-gray-200">
