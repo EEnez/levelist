@@ -1,53 +1,38 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { Game, GameStatus } from '@/types';
 import { sampleGames } from '@/components/GameCard/GameCard.stories';
+import { Game, GameStatus } from '@/types';
 
-export default function GameDetailsPage() {
+interface GameDetailPageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function GameDetailPage({ params }: GameDetailPageProps) {
+  const { id } = use(params);
   const router = useRouter();
-  const params = useParams();
-  const gameId = params.id as string;
-  
   const [game, setGame] = useState<Game | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadGame = async () => {
-      try {
-        const foundGame = sampleGames.find(g => g.id === gameId);
-        
-        if (!foundGame) {
-          setError('Game not found');
-          return;
-        }
-        
-        setGame(foundGame);
-      } catch (error) {
-        console.error('Error loading game:', error);
-        setError('Error loading game');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    if (gameId) {
-      loadGame();
+    const foundGame = sampleGames.find(g => g.id === id);
+    if (foundGame) {
+      setGame(foundGame);
+    } else {
+      setError('Game not found');
     }
-  }, [gameId]);
+    setIsLoading(false);
+  }, [id]);
 
   const handleEdit = () => {
-    if (game) {
-      router.push(`/games/${game.id}/edit`);
-    }
+    router.push(`/games/${id}/edit`);
   };
 
   const handleDelete = () => {
     if (game && confirm('Are you sure you want to remove this game from your collection?')) {
-      console.log('Game deleted:', game.id);
       router.push('/games');
     }
   };

@@ -15,7 +15,7 @@ type ViewMode = 'grid' | 'list';
 
 export default function GamesPage() {
   const router = useRouter();
-  const [games] = useState<Game[]>(sampleGames);
+  const [games, setGames] = useState<Game[]>(sampleGames);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
@@ -30,10 +30,9 @@ export default function GamesPage() {
     router.push(`/games/${game.id}/edit`);
   };
 
-  const handleDelete = (gameId: string) => {
-    console.log('Delete game:', gameId);
+  const handleDeleteGame = (gameId: string) => {
     if (confirm('Are you sure you want to remove this game from your collection?')) {
-      console.log('Game deleted:', gameId);
+      setGames(prev => prev.filter(game => game.id !== gameId));
     }
   };
 
@@ -278,7 +277,7 @@ export default function GamesPage() {
                 <GameCard
                   game={game}
                   onEdit={handleEdit}
-                  onDelete={handleDelete}
+                  onDelete={handleDeleteGame}
                 />
               ) : (
                 // List view layout
@@ -343,7 +342,7 @@ export default function GamesPage() {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          handleDelete(game.id);
+                          handleDeleteGame(game.id);
                         }}
                         className="p-2 text-gray-400 hover:text-red-600 transition-colors"
                         aria-label="Delete game"
