@@ -58,12 +58,12 @@ export default function GamesPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen bg-white dark:bg-cyber-dark">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Games</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-cyber-text mb-2">My Games</h1>
+          <p className="text-gray-600 dark:text-cyber-muted">
             {filteredGames.length} of {games.length} {games.length === 1 ? 'game' : 'games'} 
             {filteredGames.length !== games.length && ' (filtered)'}
           </p>
@@ -71,7 +71,7 @@ export default function GamesPage() {
         <div className="mt-4 sm:mt-0">
           <button
             onClick={handleAddGame}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center space-x-2"
+            className="bg-blue-600 dark:bg-cyber-electric text-white dark:text-cyber-dark px-4 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-cyber-magenta transition-all duration-200 inline-flex items-center space-x-2 shadow-lg dark:shadow-cyber-electric/20"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -86,7 +86,7 @@ export default function GamesPage() {
         {/* Search Bar */}
         <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 text-gray-400 dark:text-cyber-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -95,14 +95,14 @@ export default function GamesPage() {
             placeholder="Search games..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-cyber-lighter rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyber-electric focus:border-blue-500 dark:focus:border-cyber-electric text-sm bg-white dark:bg-cyber-lighter text-gray-900 dark:text-cyber-text placeholder-gray-500 dark:placeholder-cyber-muted"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-gray-400 dark:text-cyber-muted hover:text-gray-600 dark:hover:text-cyber-electric" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -121,14 +121,14 @@ export default function GamesPage() {
 
           {/* View Toggle */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700">View:</span>
-            <div className="flex bg-gray-100 rounded-lg p-1">
+            <span className="text-sm text-gray-700 dark:text-cyber-muted">View:</span>
+            <div className="flex bg-gray-100 dark:bg-cyber-lighter rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-cyber-electric text-gray-900 dark:text-cyber-dark shadow-sm'
+                    : 'text-gray-600 dark:text-cyber-muted hover:text-gray-900 dark:hover:text-cyber-text'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,8 +139,8 @@ export default function GamesPage() {
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-cyber-electric text-gray-900 dark:text-cyber-dark shadow-sm'
+                    : 'text-gray-600 dark:text-cyber-muted hover:text-gray-900 dark:hover:text-cyber-text'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,31 +155,31 @@ export default function GamesPage() {
       {/* Active Filters Summary */}
       {(filters.genres.length > 0 || filters.platforms.length > 0 || filters.statuses.length > 0 || 
         filters.minRating !== undefined || filters.maxRating !== undefined) && (
-        <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-cyber-darker border border-blue-200 dark:border-cyber-lighter rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-blue-900">Active filters:</span>
+              <span className="text-sm font-medium text-blue-900 dark:text-cyber-electric">Active filters:</span>
               
               {filters.genres.map(genre => (
-                <span key={genre} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                <span key={genre} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-cyber-electric/20 text-blue-800 dark:text-cyber-electric">
                   {genre.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {filters.platforms.map(platform => (
-                <span key={platform} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                <span key={platform} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-cyber-magenta/20 text-green-800 dark:text-cyber-magenta">
                   {platform.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {filters.statuses.map(status => (
-                <span key={status} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                <span key={status} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-cyber-electric/20 text-purple-800 dark:text-cyber-electric">
                   {status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {(filters.minRating !== undefined || filters.maxRating !== undefined) && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-cyber-magenta/20 text-yellow-800 dark:text-cyber-magenta">
                   Rating: {filters.minRating || 0}-{filters.maxRating || 10}
                 </span>
               )}
@@ -195,7 +195,7 @@ export default function GamesPage() {
                 minRating: undefined,
                 maxRating: undefined,
               })}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+              className="text-sm text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
             >
               Clear filters
             </button>
@@ -210,18 +210,18 @@ export default function GamesPage() {
           {searchTerm || filters.genres.length > 0 || filters.platforms.length > 0 || filters.statuses.length > 0 ? (
             // No search/filter results
             <div>
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-cyber-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No games found</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-cyber-text mb-2">No games found</h3>
+              <p className="text-gray-600 dark:text-cyber-muted mb-4">
                 No games match your current search and filter criteria.
               </p>
               <div className="space-x-2">
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="text-blue-600 hover:text-blue-700 font-medium"
+                    className="text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
                   >
                     Clear search
                   </button>
@@ -236,7 +236,7 @@ export default function GamesPage() {
                     minRating: undefined,
                     maxRating: undefined,
                   })}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
                 >
                   Clear filters
                 </button>
@@ -245,16 +245,16 @@ export default function GamesPage() {
           ) : (
             // No games in collection
             <div>
-              <svg className="mx-auto h-12 w-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-cyber-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">No games yet</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-cyber-text mb-2">No games yet</h3>
+              <p className="text-gray-600 dark:text-cyber-muted mb-4">
                 Start building your collection by adding your first game.
               </p>
               <button
                 onClick={handleAddGame}
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center space-x-2"
+                className="bg-blue-600 dark:bg-cyber-electric text-white dark:text-cyber-dark px-4 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-cyber-magenta transition-all duration-200 inline-flex items-center space-x-2 shadow-lg dark:shadow-cyber-electric/20"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
