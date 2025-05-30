@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Layout/Header";
+import ThemeProvider from "@/components/ThemeProvider/ThemeProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -14,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "My Video Game Tracker",
-  description: "A personal video game tracking application",
+  title: "LevelList - Gaming Collection Tracker",
+  description: "Track your video game collection",
 };
 
 export default function RootLayout({
@@ -25,13 +26,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-50`}
-      >
-        <Header />
-        <main className="min-h-screen">
-        {children}
-        </main>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased transition-colors duration-300`}>
+        <ThemeProvider>
+          <Header />
+          <main className="min-h-screen">
+            {children}
+          </main>
+        </ThemeProvider>
       </body>
     </html>
   );

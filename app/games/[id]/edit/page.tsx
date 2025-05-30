@@ -1,72 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
+import { useState, useEffect, use } from 'react';
+import { useRouter } from 'next/navigation';
 import GameForm from '@/components/GameForm/GameForm';
-import { GameFormData, Game } from '@/types';
 import { sampleGames } from '@/components/GameCard/GameCard.stories';
+import { Game, GameFormData } from '@/types';
 
-export default function EditGamePage() {
+interface EditGamePageProps {
+  params: Promise<{ id: string }>;
+}
+
+export default function EditGamePage({ params }: EditGamePageProps) {
+  const { id } = use(params);
   const router = useRouter();
-  const params = useParams();
-  const gameId = params.id as string;
-  
   const [game, setGame] = useState<Game | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoadingGame, setIsLoadingGame] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isLoadingGame, setIsLoadingGame] = useState(true);
 
   // Load game data
   useEffect(() => {
-    const loadGame = async () => {
-      try {
-        const foundGame = sampleGames.find(g => g.id === gameId);
-        
-        if (!foundGame) {
-          setError('Game not found');
-          return;
-        }
-        
-        setGame(foundGame);
-      } catch (error) {
-        console.error('Error loading game:', error);
-        setError('Error loading game');
-      } finally {
-        setIsLoadingGame(false);
-      }
-    };
-
-    if (gameId) {
-      loadGame();
+    const foundGame = sampleGames.find(g => g.id === id);
+    if (foundGame) {
+      setGame(foundGame);
+    } else {
+      setError('Game not found');
     }
-  }, [gameId]);
+    setIsLoadingGame(false);
+  }, [id]);
 
   const handleSubmit = async (data: GameFormData) => {
-    if (!game) return;
-    
-    setIsLoading(true);
-    
     try {
       const updatedGame: Game = {
-        ...game,
+        ...game!,
         ...data,
-        releaseDate: data.releaseDate ? new Date(data.releaseDate) : game.releaseDate,
-        completionDate: data.completionDate ? new Date(data.completionDate) : game.completionDate,
-        updatedAt: new Date()
+        id: game!.id,
+        createdAt: game!.createdAt,
+        updatedAt: new Date(),
+        releaseDate: data.releaseDate ? new Date(data.releaseDate) : game!.releaseDate,
+        completionDate: data.completionDate ? new Date(data.completionDate) : game!.completionDate,
       };
       
-      console.log('Updating game:', updatedGame);
-      
-      router.push('/games');
-    } catch (error) {
-      console.error('Error updating game:', error);
-    } finally {
-      setIsLoading(false);
+      router.push(`/games/${updatedGame.id}`);
+    } catch {
+      setError('Error updating game');
     }
   };
 
   const handleCancel = () => {
-    router.back();
+    router.push(`/games/${id}`);
   };
 
   if (isLoadingGame) {
@@ -137,7 +118,6 @@ export default function EditGamePage() {
           game={game}
           onSubmit={handleSubmit}
           onCancel={handleCancel}
-          isLoading={isLoading}
         />
       </div>
     </div>
