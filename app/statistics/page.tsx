@@ -1,275 +1,289 @@
 'use client';
 
-import { useMemo } from 'react';
-import { gameCollection } from '@/data/gameData';
-import { GameStatus, Platform, Genre } from '@/types';
+import { useGames } from '@/contexts/GameContext';
 
 export default function StatisticsPage() {
-  const games = gameCollection;
+  const { games, isLoading, error } = useGames();
+
+  if (isLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-lg text-gray-600 dark:text-gray-400">
+            Loading statistics...
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <div className="flex justify-center items-center min-h-[400px]">
+          <div className="text-lg text-red-600 dark:text-red-400">
+            Error: {error}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   // Calculate statistics
-  const stats = useMemo(() => {
-    const totalGames = games.length;
-    const totalHours = games.reduce((sum, game) => sum + (game.hoursPlayed || 0), 0);
-    const averageRating = games.filter(g => g.rating).reduce((sum, game) => sum + (game.rating || 0), 0) / games.filter(g => g.rating).length;
+  const totalGames = games.length;
+  const completedGames = games.filter(game => game.status === 'completed').length;
+  const playingGames = games.filter(game => game.status === 'currently_playing').length;
+  const wantToPlayGames = games.filter(game => game.status === 'want_to_play').length;
+  const onHoldGames = games.filter(game => game.status === 'on_hold').length;
+  const droppedGames = games.filter(game => game.status === 'dropped').length;
 
-    // Status distribution
-    const statusCounts = Object.values(GameStatus).reduce((acc, status) => {
-      acc[status] = games.filter(game => game.status === status).length;
-      return acc;
-    }, {} as Record<GameStatus, number>);
+  const totalHoursPlayed = games.reduce((total, game) => total + (game.hoursPlayed || 0), 0);
+  const averageRating = games.filter(game => game.rating).length > 0 
+    ? games.filter(game => game.rating).reduce((sum, game) => sum + (game.rating || 0), 0) / games.filter(game => game.rating).length
+    : 0;
 
-    // Platform distribution
-    const platformCounts = Object.values(Platform).reduce((acc, platform) => {
-      acc[platform] = games.filter(game => game.platforms.includes(platform)).length;
-      return acc;
-    }, {} as Record<Platform, number>);
+  const completionRate = totalGames > 0 ? (completedGames / totalGames) * 100 : 0;
 
-    // Genre distribution
-    const genreCounts = Object.values(Genre).reduce((acc, genre) => {
-      acc[genre] = games.filter(game => game.genres.includes(genre)).length;
-      return acc;
-    }, {} as Record<Genre, number>);
+  // Genre statistics
+  const genreStats = games.reduce((acc, game) => {
+    game.genres.forEach(genre => {
+      acc[genre] = (acc[genre] || 0) + 1;
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
-    // Recent completions (last 30 days)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    const recentCompletions = games.filter(game => 
-      game.completionDate && new Date(game.completionDate) > thirtyDaysAgo
-    ).length;
+  const topGenres = Object.entries(genreStats)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
 
-    // Most played platform
-    const mostPlayedPlatform = Object.entries(platformCounts)
-      .sort(([,a], [,b]) => b - a)[0];
+  // Platform statistics
+  const platformStats = games.reduce((acc, game) => {
+    game.platforms.forEach(platform => {
+      acc[platform] = (acc[platform] || 0) + 1;
+    });
+    return acc;
+  }, {} as Record<string, number>);
 
-    // Most popular genre
-    const mostPopularGenre = Object.entries(genreCounts)
-      .sort(([,a], [,b]) => b - a)[0];
+  const topPlatforms = Object.entries(platformStats)
+    .sort(([, a], [, b]) => b - a)
+    .slice(0, 5);
 
-    return {
-      totalGames,
-      totalHours,
-      averageRating: isNaN(averageRating) ? 0 : averageRating,
-      statusCounts,
-      platformCounts,
-      genreCounts,
-      recentCompletions,
-      mostPlayedPlatform,
-      mostPopularGenre,
-      completionRate: totalGames > 0 ? (statusCounts[GameStatus.COMPLETED] / totalGames) * 100 : 0
-    };
-  }, [games]);
-
-  const formatLabel = (value: string) => {
-    return value.split('_').map(word => 
-      word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-    ).join(' ');
-  };
-
-  const getStatusColor = (status: GameStatus) => {
-    switch (status) {
-      case GameStatus.COMPLETED:
-        return 'bg-green-500';
-      case GameStatus.CURRENTLY_PLAYING:
-        return 'bg-blue-500';
-      case GameStatus.WANT_TO_PLAY:
-        return 'bg-yellow-500';
-      case GameStatus.ON_HOLD:
-        return 'bg-orange-500';
-      case GameStatus.DROPPED:
-        return 'bg-red-500';
-      default:
-        return 'bg-gray-500';
-    }
-  };
+  // Recent activity
+  const recentlyCompleted = games
+    .filter(game => game.status === 'completed' && game.completionDate)
+    .sort((a, b) => {
+      const dateA = a.completionDate ? new Date(a.completionDate).getTime() : 0;
+      const dateB = b.completionDate ? new Date(b.completionDate).getTime() : 0;
+      return dateB - dateA;
+    })
+    .slice(0, 5);
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen bg-white dark:bg-gray-900">
-      {/* Header */}
+    <div className="container mx-auto px-4 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Gaming Statistics</h1>
-        <p className="text-gray-600 dark:text-gray-300">
-          Insights into your gaming habits and collection
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+          Statistics
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400">
+          Overview of your collection and gaming habits
         </p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        {/* Total Games */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
+      {totalGames === 0 ? (
+        <div className="text-center py-12">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            No statistics available
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Add games to your collection to see your statistics!
+          </p>
+          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            Add Game
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {/* Overview Stats */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Total Games
+              </h3>
+              <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                {totalGames}
+              </p>
             </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Games</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalGames}</p>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Hours Played
+              </h3>
+              <p className="text-3xl font-bold text-green-600 dark:text-green-400">
+                {totalHoursPlayed}h
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Average Rating
+              </h3>
+              <p className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                {averageRating.toFixed(1)}/10
+              </p>
+            </div>
+
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Completion Rate
+              </h3>
+              <p className="text-3xl font-bold text-orange-600 dark:text-orange-400">
+                {completionRate.toFixed(1)}%
+              </p>
             </div>
           </div>
-        </div>
 
-        {/* Completed Games */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Completed</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.statusCounts[GameStatus.COMPLETED]}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Currently Playing */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Currently Playing</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.statusCounts[GameStatus.CURRENTLY_PLAYING]}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Total Hours */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="flex items-center">
-            <div className="flex-shrink-0">
-              <div className="w-8 h-8 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-5 h-5 text-yellow-600 dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total Hours</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white">{stats.totalHours}h</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-        {/* Status Distribution */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Games by Status</h3>
-          <div className="space-y-4">
-            {Object.entries(stats.statusCounts).map(([status, count]) => {
-              const percentage = stats.totalGames > 0 ? (count / stats.totalGames) * 100 : 0;
-              return (
-                <div key={status} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className={`w-3 h-3 rounded-full ${getStatusColor(status as GameStatus)}`}></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-white">
-                      {formatLabel(status)}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                      <div 
-                        className={`h-2 rounded-full ${getStatusColor(status as GameStatus)}`}
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-bold text-gray-900 dark:text-white w-8 text-right">{count}</span>
-                  </div>
+          {/* Status Breakdown */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+              Games by Status
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              <div className="text-center">
+                <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
+                  {completedGames}
                 </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Platform Distribution */}
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Games by Platform</h3>
-          <div className="space-y-4">
-            {Object.entries(stats.platformCounts).slice(0, 5).map(([platform, count]) => {
-              const percentage = stats.totalGames > 0 ? (count / stats.totalGames) * 100 : 0;
-              return (
-                <div key={platform} className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-                    <span className="text-sm font-medium text-gray-700 dark:text-white">
-                      {formatLabel(platform)}
-                    </span>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="w-24 bg-gray-200 dark:bg-gray-600 rounded-full h-2">
-                      <div 
-                        className="h-2 rounded-full bg-blue-500"
-                        style={{ width: `${percentage}%` }}
-                      ></div>
-                    </div>
-                    <span className="text-sm font-bold text-gray-900 dark:text-white w-8 text-right">{count}</span>
-                  </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Completed</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
+                  {playingGames}
                 </div>
-              );
-            })}
+                <div className="text-sm text-gray-600 dark:text-gray-400">Playing</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400 mb-1">
+                  {wantToPlayGames}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Want to Play</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-orange-600 dark:text-orange-400 mb-1">
+                  {onHoldGames}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">On Hold</div>
+              </div>
+              <div className="text-center">
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400 mb-1">
+                  {droppedGames}
+                </div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">Dropped</div>
+              </div>
+            </div>
           </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Top Genres */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                Top Genres
+              </h2>
+              {topGenres.length > 0 ? (
+                <div className="space-y-4">
+                  {topGenres.map(([genre, count], index) => (
+                    <div key={genre} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-6">
+                          {index + 1}.
+                        </span>
+                        <span className="text-gray-900 dark:text-white ml-2">
+                          {genre}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                          <div
+                            className="bg-blue-600 dark:bg-blue-400 h-2 rounded-full"
+                            style={{ width: `${(count / totalGames) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-8">
+                          {count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600 dark:text-gray-400">No genres available</p>
+              )}
+            </div>
+
+            {/* Top Platforms */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                Top Platforms
+              </h2>
+              {topPlatforms.length > 0 ? (
+                <div className="space-y-4">
+                  {topPlatforms.map(([platform, count], index) => (
+                    <div key={platform} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <span className="text-sm font-medium text-gray-500 dark:text-gray-400 w-6">
+                          {index + 1}.
+                        </span>
+                        <span className="text-gray-900 dark:text-white ml-2">
+                          {platform}
+                        </span>
+                      </div>
+                      <div className="flex items-center">
+                        <div className="w-24 bg-gray-200 dark:bg-gray-700 rounded-full h-2 mr-3">
+                          <div
+                            className="bg-green-600 dark:bg-green-400 h-2 rounded-full"
+                            style={{ width: `${(count / totalGames) * 100}%` }}
+                          ></div>
+                        </div>
+                        <span className="text-sm font-medium text-gray-900 dark:text-white w-8">
+                          {count}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-600 dark:text-gray-400">No platforms available</p>
+              )}
+            </div>
+          </div>
+
+          {/* Recent Activity */}
+          {recentlyCompleted.length > 0 && (
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">
+                Recently Completed
+              </h2>
+              <div className="space-y-4">
+                {recentlyCompleted.map((game) => (
+                  <div key={game.id} className="flex items-center justify-between py-2 border-b border-gray-200 dark:border-gray-700 last:border-b-0">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">
+                        {game.title}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">
+                        {game.completionDate && new Date(game.completionDate).toLocaleDateString('en-US')}
+                      </p>
+                    </div>
+                    {game.rating && (
+                      <div className="text-sm font-medium text-yellow-600 dark:text-yellow-400">
+                        ⭐ {game.rating}/10
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
-      </div>
-
-      {/* Recent Activity */}
-      <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Recent Activity</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Games completed this month</span>
-            </div>
-            <span className="text-lg font-bold text-green-600 dark:text-white">{stats.recentCompletions}</span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Most played platform</span>
-            </div>
-            <span className="text-sm font-bold text-blue-600 dark:text-white">
-              {stats.mostPlayedPlatform ? formatLabel(stats.mostPlayedPlatform[0]) : 'N/A'}
-            </span>
-          </div>
-
-          <div className="flex items-center justify-between p-3 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center">
-                <svg className="w-4 h-4 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-                </svg>
-              </div>
-              <span className="text-sm font-medium text-gray-700 dark:text-white">Favorite genre</span>
-            </div>
-            <span className="text-sm font-bold text-purple-600 dark:text-white">
-              {stats.mostPopularGenre ? formatLabel(stats.mostPopularGenre[0]) : 'N/A'}
-            </span>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
   );
 } 
