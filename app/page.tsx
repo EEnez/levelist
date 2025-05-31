@@ -2,6 +2,7 @@
 
 import GameCard from '@/components/GameCard/GameCard';
 import { useGames } from '@/contexts/GameContext';
+import Link from 'next/link';
 
 export default function Home() {
   const { games, isLoading, error } = useGames();
@@ -106,9 +107,9 @@ export default function Home() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Start by adding your first games!
           </p>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+          <Link href="/games/add" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
             Add Game
-          </button>
+          </Link>
         </div>
       )}
     </div>

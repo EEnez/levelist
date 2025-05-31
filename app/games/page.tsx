@@ -4,6 +4,7 @@ import { useState } from 'react';
 import GameCard from '@/components/GameCard/GameCard';
 import { useGames } from '@/contexts/GameContext';
 import { GameStatus, Genre } from '@/types';
+import Link from 'next/link';
 
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
@@ -204,9 +205,9 @@ export default function GamesPage() {
             }
           </p>
           {games.length === 0 && (
-            <button className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+            <Link href="/games/add" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
               Add Game
-            </button>
+            </Link>
           )}
         </div>
       )}

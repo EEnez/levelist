@@ -1,322 +1,261 @@
 'use client';
 
-import { useState, useEffect, use } from 'react';
+import { use } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { gameCollection } from '@/data/gameData';
-import { Game, GameStatus } from '@/types';
+import Link from 'next/link';
+import { useGames } from '@/contexts/GameContext';
 
 interface GameDetailPageProps {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 }
 
 export default function GameDetailPage({ params }: GameDetailPageProps) {
   const { id } = use(params);
   const router = useRouter();
-  const [game, setGame] = useState<Game | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { getGameById, deleteGame, isLoading } = useGames();
 
-  useEffect(() => {
-    const foundGame = gameCollection.find(g => g.id === id);
-    if (foundGame) {
-      setGame(foundGame);
-    } else {
-      setError('Game not found');
-    }
-    setIsLoading(false);
-  }, [id]);
+  const game = getGameById(id);
 
-  const handleEdit = () => {
-    router.push(`/games/${id}/edit`);
-  };
-
-  const handleDelete = () => {
-    if (game && confirm('Are you sure you want to remove this game from your collection?')) {
-      router.push('/games');
+  const handleDelete = async () => {
+    if (confirm('Are you sure you want to delete this game?')) {
+      try {
+        await deleteGame(id);
+        router.push('/games');
+      } catch (error) {
+        console.error('Failed to delete game:', error);
+      }
     }
   };
 
-  const getStatusColor = (status: GameStatus) => {
-    switch (status) {
-      case GameStatus.COMPLETED:
-        return 'bg-green-100 text-green-800 border-green-200';
-      case GameStatus.CURRENTLY_PLAYING:
-        return 'bg-blue-100 text-blue-800 border-blue-200';
-      case GameStatus.WANT_TO_PLAY:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-      case GameStatus.ON_HOLD:
-        return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case GameStatus.DROPPED:
-        return 'bg-red-100 text-red-800 border-red-200';
-      default:
-        return 'bg-gray-100 text-gray-800 border-gray-200';
-    }
-  };
-
-  const getStatusText = (status: GameStatus) => {
-    switch (status) {
-      case GameStatus.COMPLETED:
-        return 'Completed';
-      case GameStatus.CURRENTLY_PLAYING:
-        return 'Currently Playing';
-      case GameStatus.WANT_TO_PLAY:
-        return 'Want to Play';
-      case GameStatus.ON_HOLD:
-        return 'On Hold';
-      case GameStatus.DROPPED:
-        return 'Dropped';
-      default:
-        return status;
-    }
-  };
-
-  if (isLoading) {
+  if (!game) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="flex items-center space-x-2">
-            <svg className="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span className="text-gray-600">Loading game...</span>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error || !game) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center py-12">
-          <svg className="mx-auto h-12 w-12 text-red-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16c-.77.833.192 2.5 1.732 2.5z" />
-          </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            {error || 'Game not found'}
-          </h3>
-          <p className="text-gray-600 mb-4">
+      <div className="container mx-auto px-4 py-8">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Game not found
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
             The game you are looking for does not exist or could not be loaded.
           </p>
-          <button
-            onClick={() => router.push('/games')}
-            className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors"
+          <Link
+            href="/games"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
           >
             Back to Collection
-          </button>
+          </Link>
         </div>
       </div>
     );
   }
 
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'completed':
+        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+      case 'currently_playing':
+        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+      case 'want_to_play':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+      case 'on_hold':
+        return 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200';
+      case 'dropped':
+        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200';
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'currently_playing':
+        return 'Currently Playing';
+      case 'want_to_play':
+        return 'Want to Play';
+      case 'on_hold':
+        return 'On Hold';
+      default:
+        return status.charAt(0).toUpperCase() + status.slice(1);
+    }
+  };
+
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Breadcrumb */}
-      <div className="flex items-center space-x-2 text-sm text-gray-600 mb-6">
-        <button
-          onClick={() => router.push('/games')}
-          className="hover:text-gray-900 transition-colors"
-        >
-          My Games
-        </button>
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-        <span className="text-gray-900 truncate">{game.title}</span>
-      </div>
-
-      {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column - Cover & Actions */}
-        <div className="lg:col-span-1">
-          {/* Cover Image */}
-          <div className="aspect-[3/4] bg-gray-100 rounded-lg overflow-hidden relative mb-6">
-            {game.coverImageUrl ? (
-              <Image
-                src={game.coverImageUrl}
-                alt={`${game.title} cover`}
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 100vw, 33vw"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                <svg className="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
+    <div className="container mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            href="/games"
+            className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 mb-4 inline-flex items-center"
+          >
+            ← Back to Collection
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {game.title}
+              </h1>
+              <div className="flex items-center gap-4 mb-4">
+                <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(game.status)}`}>
+                  {getStatusLabel(game.status)}
+                </span>
+                {game.rating && (
+                  <div className="flex items-center">
+                    <span className="text-yellow-500 mr-1">⭐</span>
+                    <span className="text-gray-900 dark:text-white font-medium">
+                      {game.rating}/10
+                    </span>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-
-          {/* Action Buttons */}
-          <div className="space-y-3">
-            <button
-              onClick={handleEdit}
-              className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 transition-colors inline-flex items-center justify-center space-x-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-              <span>Edit Game</span>
-            </button>
-            <button
-              onClick={handleDelete}
-              className="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-red-700 transition-colors inline-flex items-center justify-center space-x-2"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              <span>Remove from Collection</span>
-            </button>
+            </div>
+            <div className="flex gap-3">
+              <Link
+                href={`/games/${id}/edit`}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+              >
+                Edit
+              </Link>
+              <button
+                onClick={handleDelete}
+                disabled={isLoading}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors disabled:opacity-50"
+              >
+                Delete
+              </button>
+            </div>
           </div>
         </div>
 
-        {/* Right Column - Game Details */}
-        <div className="lg:col-span-2">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">{game.title}</h1>
+        {/* Game Details */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Main Info */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* Description */}
             {game.description && (
-              <p className="text-gray-600 text-lg leading-relaxed">{game.description}</p>
-            )}
-          </div>
-
-          {/* Status & Rating */}
-          <div className="flex flex-wrap items-center gap-4 mb-6">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(game.status)}`}>
-              {getStatusText(game.status)}
-            </span>
-            {game.rating && (
-              <div className="flex items-center space-x-1">
-                <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-                <span className="text-lg font-semibold text-gray-900">{game.rating}/10</span>
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Description
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {game.description}
+                </p>
               </div>
             )}
-          </div>
 
-          {/* Game Info Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Basic Info */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Game Information</h3>
-              
-              {game.developer && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Developer</dt>
-                  <dd className="text-sm text-gray-900">{game.developer}</dd>
-                </div>
-              )}
-              
-              {game.publisher && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Publisher</dt>
-                  <dd className="text-sm text-gray-900">{game.publisher}</dd>
-                </div>
-              )}
-              
-              {game.releaseDate && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Release Date</dt>
-                  <dd className="text-sm text-gray-900">
-                    {new Date(game.releaseDate).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
+            {/* Notes */}
+            {game.notes && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">
+                  Notes
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  {game.notes}
+                </p>
+              </div>
+            )}
 
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Genres</dt>
-                <dd className="text-sm text-gray-900">
-                  <div className="flex flex-wrap gap-1 mt-1">
+            {/* Genres & Platforms */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    Genres
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
                     {game.genres.map((genre) => (
                       <span
                         key={genre}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-gray-100 text-gray-800"
+                        className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm"
                       >
-                        {genre}
+                        {genre.replace('_', ' ')}
                       </span>
                     ))}
                   </div>
-                </dd>
-              </div>
-
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Platforms</dt>
-                <dd className="text-sm text-gray-900">
-                  <div className="flex flex-wrap gap-1 mt-1">
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    Platforms
+                  </h3>
+                  <div className="flex flex-wrap gap-2">
                     {game.platforms.map((platform) => (
                       <span
                         key={platform}
-                        className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-800"
+                        className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-full text-sm"
                       >
-                        {platform}
+                        {platform.replace('_', ' ')}
                       </span>
                     ))}
                   </div>
-                </dd>
+                </div>
               </div>
-            </div>
-
-            {/* Progress & Stats */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Progress & Stats</h3>
-              
-              {game.hoursPlayed !== undefined && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Hours Played</dt>
-                  <dd className="text-sm text-gray-900">{game.hoursPlayed} hours</dd>
-                </div>
-              )}
-              
-              {game.completionDate && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Completed On</dt>
-                  <dd className="text-sm text-gray-900">
-                    {new Date(game.completionDate).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
-              
-              {game.startDate && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Started On</dt>
-                  <dd className="text-sm text-gray-900">
-                    {new Date(game.startDate).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
-
-              <div>
-                <dt className="text-sm font-medium text-gray-500">Added to Collection</dt>
-                <dd className="text-sm text-gray-900">
-                  {new Date(game.createdAt).toLocaleDateString()}
-                </dd>
-              </div>
-
-              {game.updatedAt && new Date(game.updatedAt).getTime() !== new Date(game.createdAt).getTime() && (
-                <div>
-                  <dt className="text-sm font-medium text-gray-500">Last Updated</dt>
-                  <dd className="text-sm text-gray-900">
-                    {new Date(game.updatedAt).toLocaleDateString()}
-                  </dd>
-                </div>
-              )}
             </div>
           </div>
 
-          {/* Personal Notes */}
-          {game.notes && (
-            <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">Personal Notes</h3>
-              <p className="text-gray-700 whitespace-pre-wrap">{game.notes}</p>
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Game Stats */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                Game Stats
+              </h2>
+              <div className="space-y-4">
+                {game.hoursPlayed !== undefined && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Hours Played:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {game.hoursPlayed}h
+                    </span>
+                  </div>
+                )}
+                {game.completionDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Completed:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {new Date(game.completionDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {game.releaseDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Released:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {new Date(game.releaseDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {game.developer && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Developer:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {game.developer}
+                    </span>
+                  </div>
+                )}
+                {game.publisher && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600 dark:text-gray-400">Publisher:</span>
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {game.publisher}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Cover Image */}
+            {game.coverImageUrl && (
+              <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                  Cover
+                </h2>
+                <img
+                  src={game.coverImageUrl}
+                  alt={`${game.title} cover`}
+                  className="w-full rounded-lg"
+                />
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
