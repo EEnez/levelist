@@ -16,9 +16,9 @@ LevelList features a modern, semantic theme system with professional palettes an
 - **Secondary Accent**: `#F59E0B` (warm amber)
 
 ### Midnight Pro (Dark Mode)
-- **Primary Background**: `#0F0F0F` (deep black)
-- **Secondary Background**: `#1A1A1A` (dark gray)
-- **Tertiary Background**: `#262626` (medium dark)
+- **Primary Background**: `#111827` (deep dark)
+- **Secondary Background**: `#1F2937` (dark gray)
+- **Tertiary Background**: `#374151` (medium dark)
 - **Primary Text**: `#F9FAFB` (off-white)
 - **Secondary Text**: `#9CA3AF` (light gray)
 - **Primary Accent**: `#60A5FA` (bright blue)
@@ -44,30 +44,27 @@ Automatically switches based on time:
 
 ## 🎯 Using the Modern Theme System
 
-### Semantic CSS Variables
+### Tailwind CSS Classes
+The application uses standard Tailwind CSS classes for theming:
+
 ```css
 /* Backgrounds */
---bg-primary: Main background color
---bg-secondary: Card/surface background
---bg-tertiary: Elevated surface background
---bg-accent: Subtle accent background
+bg-white dark:bg-gray-900        /* Main background */
+bg-white dark:bg-gray-800        /* Card/surface background */
+bg-gray-50 dark:bg-gray-800      /* Elevated surface background */
 
 /* Text */
---text-primary: Main text color
---text-secondary: Secondary text color
---text-tertiary: Muted text color
---text-inverse: Inverse text color
+text-gray-900 dark:text-white    /* Primary text */
+text-gray-600 dark:text-gray-300 /* Secondary text */
+text-gray-500 dark:text-gray-400 /* Muted text */
 
 /* Accents */
---accent-primary: Primary accent color
---accent-primary-hover: Primary accent hover state
---accent-secondary: Secondary accent color
---accent-secondary-hover: Secondary accent hover state
+text-blue-600 dark:text-blue-400 /* Primary accent */
+bg-blue-600 dark:bg-blue-500     /* Primary accent background */
 
 /* Borders */
---border-primary: Primary border color
---border-secondary: Secondary border color
---border-accent: Accent border color
+border-gray-200 dark:border-gray-700 /* Primary borders */
+border-gray-300 dark:border-gray-600 /* Secondary borders */
 ```
 
 ### React Hook Usage
@@ -86,54 +83,52 @@ function MyComponent() {
   } = useTheme();
 
   return (
-    <div className="bg-surface p-6">
-      <h1 className="text-primary">Current theme: {resolvedTheme}</h1>
-      <p className="text-secondary">Professional theme system</p>
+    <div className="bg-white dark:bg-gray-900 p-6">
+      <h1 className="text-gray-900 dark:text-white">Current theme: {resolvedTheme}</h1>
+      <p className="text-gray-600 dark:text-gray-300">Professional theme system</p>
     </div>
   );
 }
 ```
 
-## 🎨 Semantic CSS Classes
+## 🎨 Standard CSS Classes
 
 ### Backgrounds
-- `.bg-surface` - Secondary background (cards, surfaces)
-- `.bg-surface-elevated` - Elevated surface background
-- `.bg-accent-subtle` - Subtle accent background
+- `bg-white dark:bg-gray-900` - Main page background
+- `bg-white dark:bg-gray-800` - Card/component background
+- `bg-gray-50 dark:bg-gray-800` - Elevated surface background
 
 ### Text
-- `.text-primary` - Primary text color
-- `.text-secondary` - Secondary text color
-- `.text-tertiary` - Muted text color
-- `.text-inverse` - Inverse text color
+- `text-gray-900 dark:text-white` - Primary text color
+- `text-gray-600 dark:text-gray-300` - Secondary text color
+- `text-gray-500 dark:text-gray-400` - Muted text color
 
 ### Components
-- `.btn-primary` - Primary button styling
-- `.btn-secondary` - Secondary button styling
-- `.card` - Card component with hover effects
-- `.card-elevated` - Elevated card variant
+- Standard Tailwind component classes with dark mode variants
+- Consistent hover and focus states
+- Smooth transitions between themes
 
-### Status Badges
-- `.badge-success` - Success state badge
-- `.badge-warning` - Warning state badge
-- `.badge-error` - Error state badge
-- `.badge-info` - Info state badge
+### Status Colors
+- `bg-green-100 dark:bg-green-900/30` - Success state
+- `bg-yellow-100 dark:bg-yellow-900/30` - Warning state
+- `bg-red-100 dark:bg-red-900/30` - Error state
+- `bg-blue-100 dark:bg-blue-900/30` - Info state
 
 ### Borders & Shadows
-- `.border-primary` - Primary border color
-- `.border-secondary` - Secondary border color
-- `.shadow-sm` - Small shadow
-- `.shadow-md` - Medium shadow
-- `.shadow-lg` - Large shadow
+- `border-gray-200 dark:border-gray-700` - Primary borders
+- `border-gray-300 dark:border-gray-600` - Secondary borders
+- `shadow-sm` - Small shadow
+- `shadow-md` - Medium shadow
+- `shadow-lg` - Large shadow
 
 ## 🌟 Usage Examples
 
 ### Modern Card Component
 ```jsx
-<div className="card p-6">
-  <h3 className="text-primary font-bold mb-2">Card Title</h3>
-  <p className="text-secondary mb-4">Card description with proper contrast</p>
-  <button className="btn-primary">
+<div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+  <h3 className="text-gray-900 dark:text-white font-bold mb-2">Card Title</h3>
+  <p className="text-gray-600 dark:text-gray-300 mb-4">Card description with proper contrast</p>
+  <button className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-4 py-2 rounded-lg">
     Primary Action
   </button>
 </div>
@@ -141,7 +136,7 @@ function MyComponent() {
 
 ### Status Badge
 ```jsx
-<span className="badge-success px-3 py-1 rounded-full text-sm">
+<span className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 px-3 py-1 rounded-full text-sm">
   Completed
 </span>
 ```
@@ -151,7 +146,7 @@ function MyComponent() {
 <input 
   type="text" 
   placeholder="Enter text..."
-  className="w-full px-3 py-2 rounded-lg"
+  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"
 />
 ```
 
@@ -166,56 +161,45 @@ The modern theme system ensures:
 
 ## 🚀 Key Improvements
 
-### Semantic Approach
-- **Meaningful variable names** instead of color-specific names
-- **Automatic contrast** - text adapts to background
-- **Consistent spacing** and typography scale
-- **Reduced CSS conflicts** with fewer `!important` declarations
-
 ### Professional Design
-- **Modern color palettes** inspired by leading design systems
+- **Modern color palettes** using standard Tailwind colors
+- **Consistent spacing** and typography scale
 - **Subtle shadows** and smooth transitions
-- **Glassmorphism effects** for modern aesthetics
-- **Responsive design** optimized for all devices
+- **Clean aesthetics** optimized for readability
 
 ### Developer Experience
-- **Intuitive class names** that describe purpose, not appearance
-- **Consistent API** across all components
-- **Easy customization** through CSS variables
+- **Standard Tailwind classes** - no custom CSS variables needed
+- **Consistent patterns** across all components
+- **Easy maintenance** with standard color system
 - **TypeScript support** for theme values
 
 ## 🔧 Customization
 
 ### Adding Custom Colors
 ```css
-:root {
-  --custom-accent: #8B5CF6;
-}
-
-.dark {
-  --custom-accent: #A78BFA;
-}
-
-.custom-element {
-  color: var(--custom-accent);
+/* Use Tailwind's extend feature in tailwind.config.ts */
+module.exports = {
+  theme: {
+    extend: {
+      colors: {
+        brand: {
+          50: '#eff6ff',
+          500: '#3b82f6',
+          900: '#1e3a8a',
+        }
+      }
+    }
+  }
 }
 ```
 
-### Creating Custom Components
-```css
-.my-component {
-  background-color: var(--bg-secondary);
-  color: var(--text-primary);
-  border: 1px solid var(--border-primary);
-  box-shadow: var(--shadow-sm);
-}
-
-.my-component:hover {
-  box-shadow: var(--shadow-md);
-  transform: translateY(-1px);
-}
+### Custom Component Styling
+```jsx
+<div className="bg-brand-50 dark:bg-brand-900 text-brand-900 dark:text-brand-50">
+  Custom branded component
+</div>
 ```
 
 ---
 
-LevelList Theme System Documentation
+Last updated: January 2025

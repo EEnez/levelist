@@ -3,29 +3,30 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import GameForm from '@/components/GameForm/GameForm';
-import { sampleGames } from '@/components/GameCard/GameCard.stories';
+import { gameCollection } from '@/data/gameData';
 import { Game, GameFormData } from '@/types';
 
 interface EditGamePageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default function EditGamePage({ params }: EditGamePageProps) {
   const { id } = use(params);
   const router = useRouter();
   const [game, setGame] = useState<Game | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isLoadingGame, setIsLoadingGame] = useState(true);
 
-  // Load game data
   useEffect(() => {
-    const foundGame = sampleGames.find(g => g.id === id);
+    const foundGame = gameCollection.find(g => g.id === id);
     if (foundGame) {
       setGame(foundGame);
     } else {
       setError('Game not found');
     }
-    setIsLoadingGame(false);
+    setIsLoading(false);
   }, [id]);
 
   const handleSubmit = async (data: GameFormData) => {
@@ -50,7 +51,7 @@ export default function EditGamePage({ params }: EditGamePageProps) {
     router.push(`/games/${id}`);
   };
 
-  if (isLoadingGame) {
+  if (isLoading) {
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center justify-center py-12">

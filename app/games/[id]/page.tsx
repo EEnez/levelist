@@ -3,11 +3,13 @@
 import { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { sampleGames } from '@/components/GameCard/GameCard.stories';
+import { gameCollection } from '@/data/gameData';
 import { Game, GameStatus } from '@/types';
 
 interface GameDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
 export default function GameDetailPage({ params }: GameDetailPageProps) {
@@ -18,7 +20,7 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const foundGame = sampleGames.find(g => g.id === id);
+    const foundGame = gameCollection.find(g => g.id === id);
     if (foundGame) {
       setGame(foundGame);
     } else {

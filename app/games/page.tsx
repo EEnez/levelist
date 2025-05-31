@@ -1,69 +1,124 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import GameCard from '@/components/GameCard/GameCard';
-import FilterPanel from '@/components/FilterPanel/FilterPanel';
-import { sampleGames } from '@/components/GameCard/GameCard.stories';
-import { useGameFilters } from '@/hooks/useGameFilters';
-import { useFilterPreferences } from '@/hooks/useFilterPreferences';
+import FilterPanel, { FilterOptions } from '@/components/FilterPanel/FilterPanel';
+import { gameCollection } from '@/data/gameData';
 import { Game } from '@/types';
-import { Platform } from '@/types/enums';
 
 type ViewMode = 'grid' | 'list';
 
 export default function GamesPage() {
   const router = useRouter();
-  const [games, setGames] = useState<Game[]>(sampleGames);
+  const [games] = useState<Game[]>(gameCollection);
   const [searchTerm, setSearchTerm] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
-
-  // Filter preferences with localStorage persistence
-  const { filters, updateFilters, isLoaded } = useFilterPreferences();
+  const [filters, setFilters] = useState<FilterOptions>({
+    genres: [],
+    platforms: [],
+    statuses: [],
+    sortBy: 'title',
+    sortOrder: 'asc',
+    minRating: undefined,
+    maxRating: undefined,
+  });
 
   // Apply filters and sorting
-  const filteredGames = useGameFilters(games, filters, searchTerm);
+  const filteredGames = useMemo(() => {
+    const filtered = games.filter(game => {
+      // Search filter
+      if (searchTerm && !game.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+        return false;
+      }
+
+      // Genre filter
+      if (filters.genres.length > 0 && !filters.genres.some(genre => game.genres.includes(genre))) {
+        return false;
+      }
+
+      // Platform filter
+      if (filters.platforms.length > 0 && !filters.platforms.some(platform => game.platforms.includes(platform))) {
+        return false;
+      }
+
+      // Status filter
+      if (filters.statuses.length > 0 && !filters.statuses.includes(game.status)) {
+        return false;
+      }
+
+      // Rating filter
+      if (filters.minRating !== undefined && (!game.rating || game.rating < filters.minRating)) {
+        return false;
+      }
+      if (filters.maxRating !== undefined && (!game.rating || game.rating > filters.maxRating)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    // Sort
+    filtered.sort((a, b) => {
+      let aValue: string | number, bValue: string | number;
+      
+      switch (filters.sortBy) {
+        case 'title':
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+          break;
+        case 'rating':
+          aValue = a.rating || 0;
+          bValue = b.rating || 0;
+          break;
+        case 'hoursPlayed':
+          aValue = a.hoursPlayed || 0;
+          bValue = b.hoursPlayed || 0;
+          break;
+        case 'completionDate':
+          aValue = a.completionDate ? new Date(a.completionDate).getTime() : 0;
+          bValue = b.completionDate ? new Date(b.completionDate).getTime() : 0;
+          break;
+        default:
+          aValue = a.title.toLowerCase();
+          bValue = b.title.toLowerCase();
+      }
+
+      if (filters.sortOrder === 'desc') {
+        return aValue < bValue ? 1 : aValue > bValue ? -1 : 0;
+      } else {
+        return aValue > bValue ? 1 : aValue < bValue ? -1 : 0;
+      }
+    });
+
+    return filtered;
+  }, [games, searchTerm, filters]);
 
   const handleEdit = (game: Game) => {
     router.push(`/games/${game.id}/edit`);
   };
 
-  const handleDeleteGame = (gameId: string) => {
-    if (confirm('Are you sure you want to remove this game from your collection?')) {
-      setGames(prev => prev.filter(game => game.id !== gameId));
-    }
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleDeleteGame = (_gameId: string) => {
+    // Delete functionality would be implemented here
   };
 
   const handleAddGame = () => {
     router.push('/games/add');
   };
 
-  // Don't render until filter preferences are loaded
-  if (!isLoaded) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
-          <div className="h-4 bg-gray-200 rounded w-1/6 mb-8"></div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-            {[...Array(10)].map((_, i) => (
-              <div key={i} className="bg-gray-200 rounded-lg h-80"></div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  const updateFilters = (newFilters: FilterOptions) => {
+    setFilters(newFilters);
+  };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen bg-white dark:bg-cyber-dark">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 min-h-screen bg-white dark:bg-gray-900">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-cyber-text mb-2">My Games</h1>
-          <p className="text-gray-600 dark:text-cyber-muted">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">My Games</h1>
+          <p className="text-gray-600 dark:text-gray-300">
             {filteredGames.length} of {games.length} {games.length === 1 ? 'game' : 'games'} 
             {filteredGames.length !== games.length && ' (filtered)'}
           </p>
@@ -71,7 +126,7 @@ export default function GamesPage() {
         <div className="mt-4 sm:mt-0">
           <button
             onClick={handleAddGame}
-            className="bg-blue-600 dark:bg-cyber-electric text-white dark:text-cyber-dark px-4 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-cyber-magenta transition-all duration-200 inline-flex items-center space-x-2 shadow-lg dark:shadow-cyber-electric/20"
+            className="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-blue-600 transition-all duration-200 inline-flex items-center space-x-2 shadow-lg"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -86,7 +141,7 @@ export default function GamesPage() {
         {/* Search Bar */}
         <div className="relative flex-1 max-w-md">
           <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg className="h-5 w-5 text-gray-400 dark:text-cyber-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="h-5 w-5 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
             </svg>
           </div>
@@ -95,14 +150,14 @@ export default function GamesPage() {
             placeholder="Search games..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-cyber-lighter rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-cyber-electric focus:border-blue-500 dark:focus:border-cyber-electric text-sm bg-white dark:bg-cyber-lighter text-gray-900 dark:text-cyber-text placeholder-gray-500 dark:placeholder-cyber-muted"
+            className="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 text-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400"
           />
           {searchTerm && (
             <button
               onClick={() => setSearchTerm('')}
               className="absolute inset-y-0 right-0 pr-3 flex items-center"
             >
-              <svg className="h-4 w-4 text-gray-400 dark:text-cyber-muted hover:text-gray-600 dark:hover:text-cyber-electric" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-4 w-4 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
@@ -121,14 +176,14 @@ export default function GamesPage() {
 
           {/* View Toggle */}
           <div className="flex items-center space-x-2">
-            <span className="text-sm text-gray-700 dark:text-cyber-muted">View:</span>
-            <div className="flex bg-gray-100 dark:bg-cyber-lighter rounded-lg p-1">
+            <span className="text-sm text-gray-700 dark:text-gray-300">View:</span>
+            <div className="flex bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-white dark:bg-cyber-electric text-gray-900 dark:text-cyber-dark shadow-sm'
-                    : 'text-gray-600 dark:text-cyber-muted hover:text-gray-900 dark:hover:text-cyber-text'
+                    ? 'bg-white dark:bg-blue-500 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -139,8 +194,8 @@ export default function GamesPage() {
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-1 rounded-md text-sm font-medium transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-white dark:bg-cyber-electric text-gray-900 dark:text-cyber-dark shadow-sm'
-                    : 'text-gray-600 dark:text-cyber-muted hover:text-gray-900 dark:hover:text-cyber-text'
+                    ? 'bg-white dark:bg-blue-500 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -155,31 +210,31 @@ export default function GamesPage() {
       {/* Active Filters Summary */}
       {(filters.genres.length > 0 || filters.platforms.length > 0 || filters.statuses.length > 0 || 
         filters.minRating !== undefined || filters.maxRating !== undefined) && (
-        <div className="mb-6 p-4 bg-blue-50 dark:bg-cyber-darker border border-blue-200 dark:border-cyber-lighter rounded-lg">
+        <div className="mb-6 p-4 bg-blue-50 dark:bg-gray-800 border border-blue-200 dark:border-gray-700 rounded-lg">
           <div className="flex items-center justify-between">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-sm font-medium text-blue-900 dark:text-cyber-electric">Active filters:</span>
+              <span className="text-sm font-medium text-blue-900 dark:text-blue-400">Active filters:</span>
               
               {filters.genres.map(genre => (
-                <span key={genre} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-cyber-electric/20 text-blue-800 dark:text-cyber-electric">
+                <span key={genre} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300">
                   {genre.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {filters.platforms.map(platform => (
-                <span key={platform} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-cyber-magenta/20 text-green-800 dark:text-cyber-magenta">
+                <span key={platform} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
                   {platform.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {filters.statuses.map(status => (
-                <span key={status} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-cyber-electric/20 text-purple-800 dark:text-cyber-electric">
+                <span key={status} className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300">
                   {status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ')}
                 </span>
               ))}
               
               {(filters.minRating !== undefined || filters.maxRating !== undefined) && (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-cyber-magenta/20 text-yellow-800 dark:text-cyber-magenta">
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">
                   Rating: {filters.minRating || 0}-{filters.maxRating || 10}
                 </span>
               )}
@@ -195,7 +250,7 @@ export default function GamesPage() {
                 minRating: undefined,
                 maxRating: undefined,
               })}
-              className="text-sm text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
             >
               Clear filters
             </button>
@@ -210,18 +265,18 @@ export default function GamesPage() {
           {searchTerm || filters.genres.length > 0 || filters.platforms.length > 0 || filters.statuses.length > 0 ? (
             // No search/filter results
             <div>
-              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-cyber-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-cyber-text mb-2">No games found</h3>
-              <p className="text-gray-600 dark:text-cyber-muted mb-4">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No games found</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-4">
                 No games match your current search and filter criteria.
               </p>
               <div className="space-x-2">
                 {searchTerm && (
                   <button
                     onClick={() => setSearchTerm('')}
-                    className="text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
+                    className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                   >
                     Clear search
                   </button>
@@ -236,7 +291,7 @@ export default function GamesPage() {
                     minRating: undefined,
                     maxRating: undefined,
                   })}
-                  className="text-blue-600 dark:text-cyber-electric hover:text-blue-700 dark:hover:text-cyber-magenta font-medium"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium"
                 >
                   Clear filters
                 </button>
@@ -245,16 +300,16 @@ export default function GamesPage() {
           ) : (
             // No games in collection
             <div>
-              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-cyber-muted mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="mx-auto h-12 w-12 text-gray-400 dark:text-gray-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
-              <h3 className="text-lg font-medium text-gray-900 dark:text-cyber-text mb-2">No games yet</h3>
-              <p className="text-gray-600 dark:text-cyber-muted mb-4">
-                Start building your collection by adding your first game.
+              <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">No games yet</h3>
+              <p className="text-gray-600 dark:text-gray-300 mb-6">
+                Start building your game collection by adding your first game.
               </p>
               <button
                 onClick={handleAddGame}
-                className="bg-blue-600 dark:bg-cyber-electric text-white dark:text-cyber-dark px-4 py-2 rounded-lg font-medium hover:bg-blue-700 dark:hover:bg-cyber-magenta transition-all duration-200 inline-flex items-center space-x-2 shadow-lg dark:shadow-cyber-electric/20"
+                className="bg-blue-600 dark:bg-blue-500 hover:bg-blue-700 dark:hover:bg-blue-600 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 inline-flex items-center space-x-2 shadow-lg"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -267,95 +322,17 @@ export default function GamesPage() {
       ) : (
         // Games Grid/List
         <div className={
-          viewMode === 'grid'
+          viewMode === 'grid' 
             ? 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6'
             : 'space-y-4'
         }>
           {filteredGames.map((game) => (
-            <div key={game.id} className={viewMode === 'list' ? 'bg-white rounded-lg shadow-sm border border-gray-200 p-4' : ''}>
-              {viewMode === 'grid' ? (
-                <GameCard
-                  game={game}
-                  onEdit={handleEdit}
-                  onDelete={handleDeleteGame}
-                />
-              ) : (
-                // List view layout
-                <div className="flex items-center space-x-4 cursor-pointer hover:bg-gray-50 rounded-lg p-2 -m-2 transition-colors"
-                     onClick={() => router.push(`/games/${game.id}`)}>
-                  <div className="flex-shrink-0 w-16 h-20 bg-gray-100 rounded overflow-hidden relative">
-                    {game.coverImageUrl ? (
-                      <Image
-                        src={game.coverImageUrl}
-                        alt={`${game.title} cover`}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
-                        <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">{game.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">
-                      {game.genres.slice(0, 2).map(genre => 
-                        genre.charAt(0).toUpperCase() + genre.slice(1).replace('_', ' ')
-                      ).join(', ')}
-                      {game.genres.length > 2 && ` +${game.genres.length - 2}`}
-                    </p>
-                    <p className="text-sm text-gray-500 mt-1">
-                      {game.platforms.slice(0, 2).map(platform => {
-                        switch (platform) {
-                          case Platform.PLAYSTATION_5: return 'PS5';
-                          case Platform.PLAYSTATION_4: return 'PS4';
-                          case Platform.XBOX_SERIES: return 'Xbox Series';
-                          case Platform.XBOX_ONE: return 'Xbox One';
-                          case Platform.NINTENDO_SWITCH: return 'Switch';
-                          default: return platform.toUpperCase();
-                        }
-                      }).join(', ')}
-                      {game.platforms.length > 2 && ` +${game.platforms.length - 2}`}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-4">
-                    {game.rating && (
-                      <span className="text-sm font-medium text-gray-900">⭐ {game.rating}/10</span>
-                    )}
-                    <div className="flex space-x-1">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(game);
-                        }}
-                        className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
-                        aria-label="Edit game"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDeleteGame(game.id);
-                        }}
-                        className="p-2 text-gray-400 hover:text-red-600 transition-colors"
-                        aria-label="Delete game"
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <GameCard
+              key={game.id}
+              game={game}
+              onEdit={handleEdit}
+              onDelete={handleDeleteGame}
+            />
           ))}
         </div>
       )}

@@ -8,15 +8,24 @@ import { GameFormData } from '@/types';
 export default function AddGamePage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const handleSubmit = async (_: GameFormData) => {
+  const handleSubmit = async (_gameData: GameFormData) => {
+    setIsLoading(true);
+    setError(null);
+    
     try {
-      // In a real app, this would save to a database
-      // For now, we just redirect to the games list
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Game would be saved to backend here
       router.push('/games');
-    } catch {
-      setError('Error adding game');
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (_err) {
+      setError('Failed to save game. Please try again.');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -37,7 +46,11 @@ export default function AddGamePage() {
         </div>
       )}
 
-      <GameForm onSubmit={handleSubmit} onCancel={handleCancel} />
+      <GameForm 
+        onSubmit={handleSubmit} 
+        onCancel={handleCancel}
+        isLoading={isLoading}
+      />
     </div>
   );
 } 

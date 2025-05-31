@@ -4,12 +4,12 @@ export type Theme = 'light' | 'dark' | 'system' | 'auto';
 
 const THEME_STORAGE_KEY = 'levelist-theme';
 
-// Configuration pour le mode auto intelligent
+// Configuration for intelligent auto mode
 const AUTO_THEME_CONFIG = {
-  morningStart: 6,    // 6h00 - début transition vers clair
-  morningEnd: 8,      // 8h00 - fin transition vers clair
-  eveningStart: 18,   // 18h00 - début transition vers sombre
-  eveningEnd: 20,     // 20h00 - fin transition vers sombre
+  morningStart: 6,    // 6:00 AM - start transition to light
+  morningEnd: 8,      // 8:00 AM - end transition to light
+  eveningStart: 18,   // 6:00 PM - start transition to dark
+  eveningEnd: 20,     // 8:00 PM - end transition to dark
 };
 
 export function useTheme() {
@@ -26,7 +26,7 @@ export function useTheme() {
     return 'light';
   };
 
-  // Get time-based theme (mode auto intelligent)
+  // Get time-based theme (intelligent auto mode)
   const getTimeBasedTheme = (): 'light' | 'dark' => {
     const now = new Date();
     const hour = now.getHours();
@@ -35,25 +35,25 @@ export function useTheme() {
 
     const { morningStart, morningEnd, eveningStart, eveningEnd } = AUTO_THEME_CONFIG;
 
-    // Période nocturne (20h00 - 6h00)
+    // Night period (8:00 PM - 6:00 AM)
     if (timeInHours >= eveningEnd || timeInHours < morningStart) {
       return 'dark';
     }
     
-    // Période diurne (8h00 - 18h00)
+    // Day period (8:00 AM - 6:00 PM)
     if (timeInHours >= morningEnd && timeInHours < eveningStart) {
       return 'light';
     }
     
-    // Transitions graduelles
+    // Gradual transitions
     if (timeInHours >= morningStart && timeInHours < morningEnd) {
-      // Transition matin : progressivement vers clair
+      // Morning transition: gradually to light
       const progress = (timeInHours - morningStart) / (morningEnd - morningStart);
       return progress > 0.5 ? 'light' : 'dark';
     }
     
     if (timeInHours >= eveningStart && timeInHours < eveningEnd) {
-      // Transition soir : progressivement vers sombre
+      // Evening transition: gradually to dark
       const progress = (timeInHours - eveningStart) / (eveningEnd - eveningStart);
       return progress > 0.5 ? 'dark' : 'light';
     }
@@ -84,7 +84,7 @@ export function useTheme() {
       
       if (withTransition) {
         setIsTransitioning(true);
-        // Ajouter une classe de transition temporaire
+        // Add temporary transition class
         body.classList.add('theme-transitioning');
         
         setTimeout(() => {

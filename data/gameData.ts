@@ -1,6 +1,6 @@
 import { Game, GameStatus, Genre, Platform } from '@/types';
 
-export const sampleGames: Game[] = [
+export const gameCollection: Game[] = [
   {
     id: '1',
     title: 'The Legend of Zelda: Breath of the Wild',
@@ -22,17 +22,17 @@ export const sampleGames: Game[] = [
   },
   {
     id: '2',
-    title: 'Cyberpunk 2077',
-    description: 'Cyberpunk 2077 is an open-world, action-adventure story set in Night City, a megalopolis obsessed with power, glamour and body modification. You play as V, a mercenary outlaw going after a one-of-a-kind implant that is the key to immortality.',
+    title: 'The Witcher 3: Wild Hunt',
+    description: 'The Witcher 3: Wild Hunt is a story-driven, next-generation open world role-playing game set in a visually stunning fantasy universe full of meaningful choices and impactful consequences. You are Geralt of Rivia, mercenary monster slayer.',
     genres: [Genre.RPG, Genre.ACTION],
     platforms: [Platform.PC, Platform.PLAYSTATION_5],
     status: GameStatus.CURRENTLY_PLAYING,
-    rating: 7,
-    hoursPlayed: 45,
+    rating: 9,
+    hoursPlayed: 85,
     startDate: new Date('2024-01-01'),
-    notes: 'Great story and characters, especially Keanu Reeves as Johnny Silverhand. The city is beautifully designed but still has some technical issues. Much improved since launch.',
+    notes: 'Incredible storytelling and world-building. The side quests are as engaging as the main story. Combat feels satisfying and the choices have real consequences.',
     coverImageUrl: '',
-    releaseDate: new Date('2020-12-10'),
+    releaseDate: new Date('2015-05-19'),
     developer: 'CD Projekt Red',
     publisher: 'CD Projekt',
     createdAt: new Date('2024-01-01'),
