@@ -12,6 +12,78 @@ export default function GamesPage() {
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
 
+  // Export/Import functions
+  const exportData = () => {
+    const dataStr = JSON.stringify(games, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `levelist-games-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const importedGames = JSON.parse(e.target?.result as string);
+        if (Array.isArray(importedGames)) {
+          // Clear current data and import new data
+          localStorage.setItem('levelist-games', JSON.stringify(importedGames));
+          window.location.reload(); // Reload to refresh context
+        } else {
+          alert('Invalid file format. Please select a valid LevelList export file.');
+        }
+      } catch {
+        alert('Error reading file. Please select a valid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  const clearSampleData = () => {
+    const hasSampleData = games.some(game => 
+      game.title === 'The Legend of Zelda: Breath of the Wild' || 
+      game.title === 'The Witcher 3: Wild Hunt' ||
+      game.title === 'Hades' ||
+      game.title === 'Cyberpunk 2077'
+    );
+
+    if (!hasSampleData) {
+      alert('No sample data found in your collection.');
+      return;
+    }
+
+    if (confirm('Are you sure you want to remove all sample games? This will only delete the example games, not your personal games.')) {
+      const sampleTitles = [
+        'The Legend of Zelda: Breath of the Wild',
+        'The Witcher 3: Wild Hunt', 
+        'Hades',
+        'Cyberpunk 2077',
+        'Red Dead Redemption 2',
+        'Hollow Knight'
+      ];
+      
+      const personalGames = games.filter(game => !sampleTitles.includes(game.title));
+      localStorage.setItem('levelist-games', JSON.stringify(personalGames));
+      window.location.reload(); // Reload to refresh context
+    }
+  };
+
+  // Check if user has sample data
+  const hasSampleData = games.some(game => 
+    game.title === 'The Legend of Zelda: Breath of the Wild' || 
+    game.title === 'The Witcher 3: Wild Hunt' ||
+    game.title === 'Hades'
+  );
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -55,13 +127,54 @@ export default function GamesPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
-          My Collection
-        </h1>
-        <p className="text-gray-600 dark:text-gray-400">
-          {games.length} game{games.length !== 1 ? 's' : ''} in your collection
-        </p>
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+            My Game Collection
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400">
+            {filteredGames.length} {filteredGames.length === 1 ? 'game' : 'games'} in your collection
+          </p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3 mt-4 sm:mt-0">
+          {/* Export/Import buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={exportData}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+            >
+              <span>📤</span>
+              Export
+            </button>
+            <label className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors cursor-pointer flex items-center gap-2">
+              <span>📥</span>
+              Import
+              <input
+                type="file"
+                accept=".json"
+                onChange={importData}
+                className="hidden"
+              />
+            </label>
+            {hasSampleData && (
+              <button
+                onClick={clearSampleData}
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                title="Remove sample games from your collection"
+              >
+                <span>🗑️</span>
+                Clear Samples
+              </button>
+            )}
+          </div>
+          <Link
+            href="/games/add"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors"
+          >
+            Add Game
+          </Link>
+        </div>
       </div>
 
       {/* Filters */}

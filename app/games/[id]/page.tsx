@@ -3,6 +3,7 @@
 import { use } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useGames } from '@/contexts/GameContext';
 
 interface GameDetailPageProps {
@@ -248,11 +249,15 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
                 <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
                   Cover
                 </h2>
-                <img
-                  src={game.coverImageUrl}
-                  alt={`${game.title} cover`}
-                  className="w-full rounded-lg"
-                />
+                <div className="relative w-full aspect-[3/4] rounded-lg overflow-hidden">
+                  <Image
+                    src={game.coverImageUrl}
+                    alt={`${game.title} cover`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 33vw, 25vw"
+                  />
+                </div>
               </div>
             )}
           </div>
