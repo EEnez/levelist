@@ -44,7 +44,7 @@ body {
   --error: #EF4444;
   --info: #3B82F6;
   
-  /* Support natif du color-scheme */
+  /* Native color-scheme support */
   color-scheme: light;
 }
 

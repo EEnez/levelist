@@ -92,60 +92,63 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
 
   return (
     <div 
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-md transition-all duration-200 group cursor-pointer hover:scale-[1.02]"
+      className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border-2 border-gray-200 dark:border-gray-700 overflow-hidden cursor-pointer group relative transition-all duration-300 ease-out hover:shadow-xl hover:-translate-y-2 hover:scale-[1.02] transform-gpu will-change-transform"
       onClick={handleCardClick}
     >
       {/* Cover Image */}
-      <div className="relative aspect-[3/4] bg-gray-100 dark:bg-gray-700">
+      <div className="relative aspect-[3/4] bg-gray-100 dark:bg-gray-700 overflow-hidden">
         {game.coverImageUrl ? (
           <Image
             src={game.coverImageUrl}
             alt={`${game.title} cover`}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-all duration-500 ease-out group-hover:scale-110 group-hover:brightness-110"
             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800">
-            <svg className="w-12 h-12 text-gray-400 dark:text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-800 group-hover:from-gray-200 group-hover:to-gray-300 dark:group-hover:from-gray-600 dark:group-hover:to-gray-700 transition-all duration-300">
+            <svg className="w-12 h-12 text-gray-400 dark:text-gray-500 group-hover:text-gray-500 dark:group-hover:text-gray-400 transition-colors duration-300 group-hover:scale-110" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
             </svg>
           </div>
         )}
         
+        {/* Overlay gradient on hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
         {/* Status Badge */}
-        <div className="absolute top-2 left-2">
-          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(game.status)}`}>
+        <div className="absolute top-3 left-3 transform transition-all duration-300 group-hover:scale-105">
+          <span className={`inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${getStatusColor(game.status)} shadow-sm group-hover:shadow-md transition-shadow duration-300`}>
             {getStatusLabel(game.status)}
           </span>
         </div>
 
         {/* Rating Badge */}
         {game.rating && (
-          <div className="absolute top-2 right-2">
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black bg-opacity-70 text-white backdrop-blur-sm">
+          <div className="absolute top-3 right-3 transform transition-all duration-300 group-hover:scale-105">
+            <span className="inline-flex items-center px-2.5 py-1.5 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm shadow-sm group-hover:shadow-md group-hover:bg-black/80 transition-all duration-300">
               ⭐ {game.rating}/10
             </span>
           </div>
         )}
 
         {/* Action Buttons */}
-        <div className="absolute bottom-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+        <div className="absolute bottom-3 right-3 flex space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
           <button
             onClick={handleEditClick}
-            className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-sm transition-all duration-200 hover:scale-105 backdrop-blur-sm"
+            className="p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-200 hover:scale-110 backdrop-blur-sm hover:shadow-xl transform hover:-translate-y-0.5"
             title="Edit game"
           >
-            <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-700 hover:text-blue-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
           </button>
           <button
             onClick={handleDeleteClick}
-            className="p-1.5 bg-white bg-opacity-90 hover:bg-opacity-100 rounded-full shadow-sm transition-all duration-200 hover:scale-105 backdrop-blur-sm"
+            className="p-2 bg-white/90 hover:bg-white rounded-full shadow-lg transition-all duration-200 hover:scale-110 backdrop-blur-sm hover:shadow-xl transform hover:-translate-y-0.5"
             title="Delete game"
           >
-            <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 text-gray-700 hover:text-red-600 transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
             </svg>
           </button>
@@ -153,15 +156,15 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
       </div>
 
       {/* Game Info */}
-      <div className="p-4">
+      <div className="p-4 relative z-10 bg-white dark:bg-gray-800 transition-colors duration-300">
         {/* Title */}
-        <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 leading-tight hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+        <h3 className="font-semibold text-gray-900 dark:text-white text-sm mb-2 line-clamp-2 leading-tight group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-300">
           {game.title}
         </h3>
 
         {/* Genres */}
         {game.genres.length > 0 && (
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-1 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
             <span className="font-medium">Genre:</span> {formatGenres(game.genres)}
             {game.genres.length > 2 && <span className="text-gray-400 dark:text-gray-500"> +{game.genres.length - 2}</span>}
           </p>
@@ -169,7 +172,7 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
 
         {/* Platforms */}
         {game.platforms.length > 0 && (
-          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2">
+          <p className="text-xs text-gray-600 dark:text-gray-400 mb-2 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors duration-300">
             <span className="font-medium">Platform:</span> {formatPlatforms(game.platforms)}
             {game.platforms.length > 2 && <span className="text-gray-400 dark:text-gray-500"> +{game.platforms.length - 2}</span>}
           </p>
@@ -177,14 +180,14 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
 
         {/* Hours Played */}
         {game.hoursPlayed && game.hoursPlayed > 0 && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
             {game.hoursPlayed}h played
           </p>
         )}
 
         {/* Completion Date */}
         {game.completionDate && (
-          <p className="text-xs text-gray-500 dark:text-gray-400">
+          <p className="text-xs text-gray-500 dark:text-gray-400 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors duration-300">
             Completed: {new Date(game.completionDate).toLocaleDateString()}
           </p>
         )}
