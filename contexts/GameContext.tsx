@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
 import { Game, GameFormData } from '@/types';
 import { gameCollection } from '@/data/gameData';
+import { useToastHelpers } from '@/hooks/useToastHelpers';
 
 // Types for the context
 interface GameState {
@@ -70,6 +71,7 @@ const STORAGE_KEY = 'levelist-games';
 // Provider component
 export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
+  const toast = useToastHelpers();
 
   // Load games from localStorage on mount
   useEffect(() => {
@@ -152,8 +154,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       const newGame = formDataToGame(gameData);
       dispatch({ type: 'ADD_GAME', payload: newGame });
+      
+      toast.success('Game added!', `${gameData.title} has been added to your collection.`);
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to add game' });
+      toast.error('Failed to add game', 'Please try again.');
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -167,8 +172,11 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
       const updatedGame = formDataToGame(gameData, id);
       dispatch({ type: 'UPDATE_GAME', payload: updatedGame });
+      
+      toast.success('Game updated!', `${gameData.title} has been updated.`);
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to update game' });
+      toast.error('Failed to update game', 'Please try again.');
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
@@ -180,9 +188,15 @@ export function GameProvider({ children }: { children: ReactNode }) {
       dispatch({ type: 'SET_LOADING', payload: true });
       dispatch({ type: 'SET_ERROR', payload: null });
 
+      const gameToDelete = state.games.find(game => game.id === id);
       dispatch({ type: 'DELETE_GAME', payload: id });
+      
+      if (gameToDelete) {
+        toast.success('Game deleted', `${gameToDelete.title} has been removed from your collection.`);
+      }
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to delete game' });
+      toast.error('Failed to delete game', 'Please try again.');
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });

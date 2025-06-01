@@ -160,17 +160,24 @@ export default function GameForm({ game, onSubmit, onCancel, isLoading = false }
           Genres *
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {allGenres.map((genre) => (
-            <label key={genre} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.genres.includes(genre)}
-                onChange={() => handleGenreToggle(genre)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">{genre}</span>
-            </label>
-          ))}
+          {allGenres.map((genre) => {
+            const genreId = `genre-${genre}`;
+            return (
+              <div key={genre} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={genreId}
+                  name={genreId}
+                  checked={formData.genres.includes(genre)}
+                  onChange={() => handleGenreToggle(genre)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor={genreId} className="text-sm text-gray-700 cursor-pointer">
+                  {genre}
+                </label>
+              </div>
+            );
+          })}
         </div>
         {errors.genres && <p className="mt-1 text-sm text-red-600">{errors.genres}</p>}
       </div>
@@ -181,17 +188,24 @@ export default function GameForm({ game, onSubmit, onCancel, isLoading = false }
           Platforms *
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
-          {allPlatforms.map((platform) => (
-            <label key={platform} className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={formData.platforms.includes(platform)}
-                onChange={() => handlePlatformToggle(platform)}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm text-gray-700">{platform}</span>
-            </label>
-          ))}
+          {allPlatforms.map((platform) => {
+            const platformId = `platform-${platform}`;
+            return (
+              <div key={platform} className="flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id={platformId}
+                  name={platformId}
+                  checked={formData.platforms.includes(platform)}
+                  onChange={() => handlePlatformToggle(platform)}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <label htmlFor={platformId} className="text-sm text-gray-700 cursor-pointer">
+                  {platform}
+                </label>
+              </div>
+            );
+          })}
         </div>
         {errors.platforms && <p className="mt-1 text-sm text-red-600">{errors.platforms}</p>}
       </div>

@@ -4,6 +4,8 @@ import "./globals.css";
 import Header from "@/components/Layout/Header";
 import ThemeProvider from "@/components/ThemeProvider/ThemeProvider";
 import { GameProvider } from "@/contexts/GameContext";
+import { ToastProvider } from "@/contexts/ToastContext";
+import ToastContainer from "@/components/Toast/ToastContainer";
 import OnboardingGuide from '@/components/OnboardingGuide';
 
 const geistSans = Geist({
@@ -29,15 +31,18 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <ThemeProvider>
-          <GameProvider>
-            <Header />
-            <main className="min-h-screen">
-              {children}
-            </main>
-            <OnboardingGuide />
-          </GameProvider>
-        </ThemeProvider>
+        <ToastProvider>
+          <ThemeProvider>
+            <GameProvider>
+              <Header />
+              <main className="min-h-screen">
+                {children}
+              </main>
+              <OnboardingGuide />
+            </GameProvider>
+          </ThemeProvider>
+          <ToastContainer />
+        </ToastProvider>
       </body>
     </html>
   );
