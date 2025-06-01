@@ -5,9 +5,11 @@ import GameCard from '@/components/GameCard/GameCard';
 import { useGames } from '@/contexts/GameContext';
 import { GameStatus, Genre } from '@/types';
 import Link from 'next/link';
+import { useToastHelpers } from '@/hooks/useToastHelpers';
 
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
+  const toast = useToastHelpers();
   const [selectedStatus, setSelectedStatus] = useState<GameStatus | 'all'>('all');
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,15 +17,14 @@ export default function GamesPage() {
   // Export/Import functions
   const exportData = () => {
     const dataStr = JSON.stringify(games, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `levelist-games-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `levelist-games-${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
   };
 
   const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -35,46 +36,51 @@ export default function GamesPage() {
       try {
         const importedGames = JSON.parse(e.target?.result as string);
         if (Array.isArray(importedGames)) {
-          // Clear current data and import new data
           localStorage.setItem('levelist-games', JSON.stringify(importedGames));
           window.location.reload(); // Reload to refresh context
         } else {
-          alert('Invalid file format. Please select a valid LevelList export file.');
+          alert('Invalid file format. Please select a valid JSON file.');
         }
       } catch {
-        alert('Error reading file. Please select a valid JSON file.');
+        alert('Error reading file. Please make sure it\'s a valid JSON file.');
       }
     };
     reader.readAsText(file);
+    
+    // Reset the input
+    event.target.value = '';
   };
 
   const clearSampleData = () => {
-    const hasSampleData = games.some(game => 
-      game.title === 'The Legend of Zelda: Breath of the Wild' || 
-      game.title === 'The Witcher 3: Wild Hunt' ||
-      game.title === 'Hades' ||
-      game.title === 'Cyberpunk 2077'
-    );
-
-    if (!hasSampleData) {
-      alert('No sample data found in your collection.');
+    // Check if there are any sample games
+    const sampleTitles = [
+      'The Legend of Zelda: Breath of the Wild',
+      'The Witcher 3: Wild Hunt', 
+      'Hades',
+      'Cyberpunk 2077',
+      'Red Dead Redemption 2',
+      'Hollow Knight'
+    ];
+    
+    const hasSampleGames = games.some(game => sampleTitles.includes(game.title));
+    
+    if (!hasSampleGames) {
+      toast.info('No Sample Data', 'No sample data found in your collection.');
       return;
     }
 
-    if (confirm('Are you sure you want to remove all sample games? This will only delete the example games, not your personal games.')) {
-      const sampleTitles = [
-        'The Legend of Zelda: Breath of the Wild',
-        'The Witcher 3: Wild Hunt', 
-        'Hades',
-        'Cyberpunk 2077',
-        'Red Dead Redemption 2',
-        'Hollow Knight'
-      ];
-      
-      const personalGames = games.filter(game => !sampleTitles.includes(game.title));
-      localStorage.setItem('levelist-games', JSON.stringify(personalGames));
-      window.location.reload(); // Reload to refresh context
-    }
+    toast.confirm(
+      'Clear Sample Data',
+      'Are you sure you want to remove all sample games? This will only delete the example games, not your personal games.',
+      () => {
+        const personalGames = games.filter(game => !sampleTitles.includes(game.title));
+        localStorage.setItem('levelist-games', JSON.stringify(personalGames));
+        window.location.reload(); // Reload to refresh context
+      },
+      undefined, // onCancel - just close the toast
+      'Clear Samples',
+      'Cancel'
+    );
   };
 
   // Check if user has sample data

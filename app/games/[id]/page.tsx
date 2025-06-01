@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useGames } from '@/contexts/GameContext';
+import { useToastHelpers } from '@/hooks/useToastHelpers';
 
 interface GameDetailPageProps {
   params: Promise<{ id: string }>;
@@ -14,18 +15,26 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
   const { id } = use(params);
   const router = useRouter();
   const { getGameById, deleteGame, isLoading } = useGames();
+  const toast = useToastHelpers();
 
   const game = getGameById(id);
 
   const handleDelete = async () => {
-    if (confirm('Are you sure you want to delete this game?')) {
-      try {
-        await deleteGame(id);
-        router.push('/games');
-      } catch (error) {
-        console.error('Failed to delete game:', error);
-      }
-    }
+    toast.confirm(
+      'Delete Game',
+      `Are you sure you want to delete "${game?.title}"? This action cannot be undone.`,
+      async () => {
+        try {
+          await deleteGame(id);
+          router.push('/games');
+        } catch (error) {
+          console.error('Failed to delete game:', error);
+        }
+      },
+      undefined, // onCancel - just close the toast
+      'Delete',
+      'Cancel'
+    );
   };
 
   if (!game) {
