@@ -3,16 +3,17 @@
 import { useState } from 'react';
 import GameCard from '@/components/GameCard/GameCard';
 import { useGames } from '@/contexts/GameContext';
-import { GameStatus, Genre } from '@/types';
+import { GameStatus, Genre, Game } from '@/types';
 import Link from 'next/link';
 import { useToastHelpers } from '@/hooks/useToastHelpers';
+import SmartSearchInput from '@/components/SmartSearch/SmartSearchInput';
 
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
   const toast = useToastHelpers();
   const [selectedStatus, setSelectedStatus] = useState<GameStatus | 'all'>('all');
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredGames, setFilteredGames] = useState<Game[]>([]);
 
   // Export/Import functions
   const exportData = () => {
@@ -119,17 +120,13 @@ export default function GamesPage() {
     new Set(games.flatMap(game => game.genres))
   ).sort();
 
-  // Filter games based on selected filters and search term
-  const filteredGames = games.filter(game => {
-    const matchesStatus = selectedStatus === 'all' || game.status === selectedStatus;
-    const matchesGenre = selectedGenre === 'all' || game.genres.includes(selectedGenre);
-    const matchesSearch = searchTerm === '' || 
-      game.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      game.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      game.developer?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    return matchesStatus && matchesGenre && matchesSearch;
-  });
+  // Handle search results from SmartSearchInput
+  const handleSearchResults = (searchFilteredGames: Game[]) => {
+    setFilteredGames(searchFilteredGames);
+  };
+
+  // Display games: use filtered games from search if available, otherwise all games
+  const displayGames = filteredGames.length > 0 || filteredGames.length === 0 ? filteredGames : games;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -140,7 +137,7 @@ export default function GamesPage() {
             My Game Collection
           </h1>
           <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
-            {filteredGames.length} {filteredGames.length === 1 ? 'game' : 'games'} in your collection
+            {displayGames.length} {displayGames.length === 1 ? 'game' : 'games'} in your collection
           </p>
         </div>
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
@@ -186,39 +183,27 @@ export default function GamesPage() {
         </div>
       </div>
 
-      {/* Filters - Mobile optimized */}
+      {/* Enhanced Smart Search and Filters */}
       <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 mb-6 md:mb-8 shadow-sm border border-gray-200 dark:border-gray-700">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Search */}
+          {/* Smart Search Input */}
           <div className="md:col-span-1">
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Search
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              Smart Search
             </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg className="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <input
-                type="text"
-                id="search"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Title, description, developer..."
-                className="w-full pl-10 pr-4 py-3 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation"
-              />
-              {searchTerm && (
-                <button
-                  onClick={() => setSearchTerm('')}
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center touch-manipulation"
-                >
-                  <svg className="h-4 w-4 text-gray-400 hover:text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
-            </div>
+            <SmartSearchInput
+              games={games}
+              statusFilter={selectedStatus}
+              genreFilter={selectedGenre}
+              onFiltersChange={handleSearchResults}
+              placeholder="Search games, developers, genres..."
+              options={{
+                debounceMs: 300,
+                maxSuggestions: 8,
+                enableHistory: true,
+                enableHighlighting: true
+              }}
+            />
           </div>
 
           {/* Status Filter */}
@@ -262,8 +247,8 @@ export default function GamesPage() {
           </div>
         </div>
 
-        {/* Active filters summary - Mobile optimized */}
-        {(selectedStatus !== 'all' || selectedGenre !== 'all' || searchTerm) && (
+        {/* Active filters summary - Enhanced */}
+        {(selectedStatus !== 'all' || selectedGenre !== 'all') && (
           <div className="mt-4 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Active filters:</span>
@@ -271,7 +256,6 @@ export default function GamesPage() {
                 onClick={() => {
                   setSelectedStatus('all');
                   setSelectedGenre('all');
-                  setSearchTerm('');
                 }}
                 className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline touch-manipulation"
               >
@@ -301,17 +285,6 @@ export default function GamesPage() {
                   </button>
                 </span>
               )}
-              {searchTerm && (
-                <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                  Search: &quot;{searchTerm.length > 15 ? searchTerm.slice(0, 15) + '...' : searchTerm}&quot;
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="ml-2 text-purple-600 hover:text-purple-800 dark:text-purple-300 dark:hover:text-purple-100 touch-manipulation"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
             </div>
           </div>
         )}
@@ -320,14 +293,14 @@ export default function GamesPage() {
       {/* Results */}
       <div className="mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          {filteredGames.length} game{filteredGames.length !== 1 ? 's' : ''} found
+          {displayGames.length} game{displayGames.length !== 1 ? 's' : ''} found
         </p>
       </div>
 
       {/* Games Grid - Improved mobile responsive */}
-      {filteredGames.length > 0 ? (
+      {displayGames.length > 0 ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6">
-          {filteredGames.map((game) => (
+          {displayGames.map((game) => (
             <GameCard key={game.id} game={game} />
           ))}
         </div>
