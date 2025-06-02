@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import AnimatedGameCard from '@/components/Animations/AnimatedGameCard';
+import { useState, useEffect } from 'react';
+import EnhancedGameCard from '@/components/GameCard/EnhancedGameCard';
 import { GameGridSkeleton, PageHeaderSkeleton } from '@/components/Skeletons/SkeletonLoader';
 import { FadeInContainer, AnimatedList, AnimatedListItem } from '@/components/Animations/AnimatedLayout';
 import { useGames } from '@/contexts/GameContext';
@@ -13,11 +13,11 @@ import SmartSearchInput from '@/components/SmartSearch/SmartSearchInput';
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
   const toast = useToastHelpers();
+  
   const [selectedStatus, setSelectedStatus] = useState<GameStatus | 'all'>('all');
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
 
-  // Export/Import functions
   const exportData = () => {
     const dataStr = JSON.stringify(games, null, 2);
     const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
@@ -40,7 +40,7 @@ export default function GamesPage() {
         const importedGames = JSON.parse(e.target?.result as string);
         if (Array.isArray(importedGames)) {
           localStorage.setItem('levelist-games', JSON.stringify(importedGames));
-          window.location.reload(); // Reload to refresh context
+          window.location.reload();
         } else {
           alert('Invalid file format. Please select a valid JSON file.');
         }
@@ -50,12 +50,10 @@ export default function GamesPage() {
     };
     reader.readAsText(file);
     
-    // Reset the input
     event.target.value = '';
   };
 
   const clearSampleData = () => {
-    // Check if there are any sample games
     const sampleTitles = [
       'The Legend of Zelda: Breath of the Wild',
       'The Witcher 3: Wild Hunt', 
@@ -78,15 +76,14 @@ export default function GamesPage() {
       () => {
         const personalGames = games.filter(game => !sampleTitles.includes(game.title));
         localStorage.setItem('levelist-games', JSON.stringify(personalGames));
-        window.location.reload(); // Reload to refresh context
+        window.location.reload();
       },
-      undefined, // onCancel - just close the toast
+      undefined,
       'Clear Samples',
       'Cancel'
     );
   };
 
-  // Check if user has sample data
   const hasSampleData = games.some(game => 
     game.title === 'The Legend of Zelda: Breath of the Wild' || 
     game.title === 'The Witcher 3: Wild Hunt' ||
@@ -134,22 +131,18 @@ export default function GamesPage() {
     );
   }
 
-  // Get unique genres from all games
   const allGenres = Array.from(
     new Set(games.flatMap(game => game.genres))
   ).sort();
 
-  // Handle search results from SmartSearchInput
   const handleSearchResults = (searchFilteredGames: Game[]) => {
     setFilteredGames(searchFilteredGames);
   };
 
-  // Display games: use filtered games from search if available, otherwise all games
   const displayGames = filteredGames.length > 0 || filteredGames.length === 0 ? filteredGames : games;
 
   return (
     <div className="container mx-auto px-4 py-8">
-      {/* Header - Mobile optimized */}
       <FadeInContainer>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 md:mb-8">
           <div className="mb-4 sm:mb-0">
@@ -161,7 +154,6 @@ export default function GamesPage() {
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
-            {/* Export/Import buttons - Mobile layout */}
             <div className="flex gap-2">
               <button
                 onClick={exportData}
@@ -191,6 +183,7 @@ export default function GamesPage() {
                 </button>
               )}
             </div>
+            
             <Link
               href="/games/add"
               className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 md:px-6 md:py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
@@ -204,11 +197,9 @@ export default function GamesPage() {
         </div>
       </FadeInContainer>
 
-      {/* Enhanced Smart Search and Filters */}
       <FadeInContainer delay={0.1}>
         <div className="bg-white dark:bg-gray-800 rounded-lg p-4 md:p-6 mb-6 md:mb-8 shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Smart Search Input */}
             <div className="md:col-span-1">
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Smart Search
@@ -228,7 +219,6 @@ export default function GamesPage() {
               />
             </div>
 
-            {/* Status Filter */}
             <div>
               <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Status
@@ -248,7 +238,6 @@ export default function GamesPage() {
               </select>
             </div>
 
-            {/* Genre Filter */}
             <div>
               <label htmlFor="genre" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Genre
@@ -269,7 +258,6 @@ export default function GamesPage() {
             </div>
           </div>
 
-          {/* Active filters summary - Enhanced */}
           {(selectedStatus !== 'all' || selectedGenre !== 'all') && (
             <div className="mt-4 space-y-2">
               <div className="flex items-center justify-between">
@@ -313,7 +301,6 @@ export default function GamesPage() {
         </div>
       </FadeInContainer>
 
-      {/* Results */}
       <FadeInContainer delay={0.2}>
         <div className="mb-4">
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -322,7 +309,6 @@ export default function GamesPage() {
         </div>
       </FadeInContainer>
 
-      {/* Games Grid - Improved mobile responsive with animations */}
       {displayGames.length > 0 ? (
         <AnimatedList 
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6"
@@ -330,7 +316,7 @@ export default function GamesPage() {
         >
           {displayGames.map((game, index) => (
             <AnimatedListItem key={game.id}>
-              <AnimatedGameCard game={game} index={index} />
+              <EnhancedGameCard game={game} index={index} />
             </AnimatedListItem>
           ))}
         </AnimatedList>
