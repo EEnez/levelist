@@ -23,7 +23,7 @@ export function useAutoSave<T>({
   
   // Use refs to store the latest data and avoid dependency issues
   const dataRef = useRef<T | null>(null);
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const saveTimeoutRef = useRef<any>(undefined);
 
   // Stable save function
   const performSave = useCallback(

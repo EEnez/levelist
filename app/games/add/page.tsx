@@ -97,18 +97,18 @@ export default function AddGamePage() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8">
       <div className="max-w-2xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">
+        <div className="mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2 md:mb-4">
             Add New Game
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm md:text-base text-gray-600 dark:text-gray-400">
             Add a new game to your collection
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
           {/* Title */}
           <div>
             <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -119,7 +119,7 @@ export default function AddGamePage() {
               id="title"
               value={formData.title}
               onChange={(e) => handleInputChange('title', e.target.value)}
-              className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white ${
+              className={`w-full px-4 py-3 md:px-3 md:py-2 border rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation ${
                 errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               }`}
               placeholder="Enter game title"
@@ -139,7 +139,7 @@ export default function AddGamePage() {
               rows={3}
               value={formData.description}
               onChange={(e) => handleInputChange('description', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-3 md:px-3 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation resize-none"
               placeholder="Enter game description"
             />
           </div>
@@ -153,7 +153,7 @@ export default function AddGamePage() {
               id="status"
               value={formData.status}
               onChange={(e) => handleInputChange('status', e.target.value as GameStatus)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
+              className="w-full px-4 py-3 md:px-3 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation"
             >
               <option value="want_to_play">Want to Play</option>
               <option value="currently_playing">Currently Playing</option>
@@ -165,12 +165,12 @@ export default function AddGamePage() {
 
           {/* Genres */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               Genres *
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {Object.values(Genre).map((genre) => (
-                <label key={genre} className="flex items-center space-x-2 cursor-pointer">
+                <label key={genre} className="flex items-center space-x-3 cursor-pointer p-3 md:p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors touch-manipulation">
                   <input
                     type="checkbox"
                     checked={formData.genres.includes(genre)}
@@ -181,9 +181,9 @@ export default function AddGamePage() {
                         handleInputChange('genres', formData.genres.filter(g => g !== genre));
                       }
                     }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 md:w-auto md:h-auto"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize font-medium">
                     {genre.replace('_', ' ')}
                   </span>
                 </label>
@@ -196,12 +196,12 @@ export default function AddGamePage() {
 
           {/* Platforms */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
               Platforms *
             </label>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
               {Object.values(Platform).map((platform) => (
-                <label key={platform} className="flex items-center space-x-2 cursor-pointer">
+                <label key={platform} className="flex items-center space-x-3 cursor-pointer p-3 md:p-2 bg-gray-50 dark:bg-gray-800/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors touch-manipulation">
                   <input
                     type="checkbox"
                     checked={formData.platforms.includes(platform)}
@@ -212,9 +212,9 @@ export default function AddGamePage() {
                         handleInputChange('platforms', formData.platforms.filter(p => p !== platform));
                       }
                     }}
-                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 w-4 h-4 md:w-auto md:h-auto"
                   />
-                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize">
+                  <span className="text-sm text-gray-700 dark:text-gray-300 capitalize font-medium">
                     {platform.replace('_', ' ')}
                   </span>
                 </label>
@@ -225,56 +225,76 @@ export default function AddGamePage() {
             )}
           </div>
 
-          {/* Rating */}
-          <div>
-            <label htmlFor="rating" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Rating (1-10)
-            </label>
-            <input
-              type="number"
-              id="rating"
-              min="1"
-              max="10"
-              value={formData.rating || ''}
-              onChange={(e) => handleInputChange('rating', e.target.value ? parseInt(e.target.value) : undefined)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Rate from 1 to 10"
-            />
+          {/* Rating & Hours Played - Side by side on larger screens */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            {/* Rating */}
+            <div>
+              <label htmlFor="rating" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Rating (1-10)
+              </label>
+              <input
+                type="number"
+                id="rating"
+                min="1"
+                max="10"
+                value={formData.rating || ''}
+                onChange={(e) => handleInputChange('rating', e.target.value ? parseInt(e.target.value) : undefined)}
+                className="w-full px-4 py-3 md:px-3 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation"
+                placeholder="Rate from 1 to 10"
+              />
+            </div>
+
+            {/* Hours Played */}
+            <div>
+              <label htmlFor="hoursPlayed" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                Hours Played
+              </label>
+              <input
+                type="number"
+                id="hoursPlayed"
+                min="0"
+                value={formData.hoursPlayed || ''}
+                onChange={(e) => handleInputChange('hoursPlayed', e.target.value ? parseInt(e.target.value) : undefined)}
+                className="w-full px-4 py-3 md:px-3 md:py-2 border border-gray-300 dark:border-gray-600 rounded-lg md:rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white text-base touch-manipulation"
+                placeholder="Hours played"
+              />
+            </div>
           </div>
 
-          {/* Hours Played */}
-          <div>
-            <label htmlFor="hoursPlayed" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-              Hours Played
-            </label>
-            <input
-              type="number"
-              id="hoursPlayed"
-              min="0"
-              value={formData.hoursPlayed || ''}
-              onChange={(e) => handleInputChange('hoursPlayed', e.target.value ? parseInt(e.target.value) : undefined)}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white"
-              placeholder="Hours played"
-            />
-          </div>
-
-          {/* Form Actions */}
-          <div className="flex gap-4 pt-6">
+          {/* Form Actions - Better mobile layout */}
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-6 border-t border-gray-200 dark:border-gray-700">
             <button
               type="button"
               onClick={() => router.back()}
-              className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+              className="order-2 sm:order-1 sm:flex-1 px-6 py-3 md:px-4 md:py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg md:rounded-md hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors font-medium touch-manipulation"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isLoading}
-              className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="order-1 sm:order-2 sm:flex-1 px-6 py-3 md:px-4 md:py-2 bg-blue-600 text-white rounded-lg md:rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium touch-manipulation shadow-lg hover:shadow-xl"
             >
-              {isLoading ? 'Adding...' : 'Add Game'}
+              {isLoading ? (
+                <span className="flex items-center justify-center space-x-2">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  <span>Adding...</span>
+                </span>
+              ) : (
+                'Add Game'
+              )}
             </button>
           </div>
+
+          {/* Submit Error */}
+          {errors.submit && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+              <p className="text-sm text-red-600 dark:text-red-400">{errors.submit}</p>
+            </div>
+          )}
         </form>
       </div>
     </div>
