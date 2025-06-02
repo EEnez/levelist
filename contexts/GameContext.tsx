@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, ReactNode } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, ReactNode, useRef } from 'react';
 import { Game, GameFormData } from '@/types';
 import { gameCollection } from '@/data/gameData';
 import { useToastHelpers } from '@/hooks/useToastHelpers';
+import { useAutoSave, SaveStatus } from '@/hooks/useAutoSave';
 
 // Types for the context
 interface GameState {
@@ -25,6 +26,9 @@ interface GameContextType extends GameState {
   updateGame: (id: string, gameData: GameFormData) => Promise<void>;
   deleteGame: (id: string) => Promise<void>;
   getGameById: (id: string) => Game | undefined;
+  saveStatus: SaveStatus;
+  lastSaved: Date | null;
+  saveError: string | null;
 }
 
 // Initial state
@@ -73,6 +77,27 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, initialState);
   const toast = useToastHelpers();
 
+  // Auto-save setup - more stable implementation
+  const { status, lastSaved, error: saveError, save } = useAutoSave<Game[]>({
+    storageKey: STORAGE_KEY,
+  });
+
+  // Save games when they change (but avoid initial load)
+  const isInitialLoad = useRef(true);
+  
+  useEffect(() => {
+    // Skip auto-save on initial load to avoid saving before data is loaded
+    if (isInitialLoad.current) {
+      isInitialLoad.current = false;
+      return;
+    }
+
+    // Only save if we have games and they're not empty
+    if (state.games.length > 0) {
+      save(state.games);
+    }
+  }, [state.games]); // Remove 'save' from dependencies to avoid loop
+
   // Load games from localStorage on mount
   useEffect(() => {
     const loadGames = () => {
@@ -105,18 +130,6 @@ export function GameProvider({ children }: { children: ReactNode }) {
 
     loadGames();
   }, []);
-
-  // Save games to localStorage whenever games change
-  useEffect(() => {
-    if (state.games.length > 0) {
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.games));
-      } catch (error) {
-        console.error('Failed to save games to localStorage:', error);
-        dispatch({ type: 'SET_ERROR', payload: 'Failed to save games' });
-      }
-    }
-  }, [state.games]);
 
   // Generate unique ID
   const generateId = (): string => {
@@ -213,6 +226,9 @@ export function GameProvider({ children }: { children: ReactNode }) {
     updateGame,
     deleteGame,
     getGameById,
+    saveStatus: status,
+    lastSaved,
+    saveError,
   };
 
   return <GameContext.Provider value={value}>{children}</GameContext.Provider>;

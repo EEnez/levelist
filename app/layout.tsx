@@ -7,6 +7,7 @@ import { GameProvider } from "@/contexts/GameContext";
 import { ToastProvider } from "@/contexts/ToastContext";
 import ToastContainer from "@/components/Toast/ToastContainer";
 import OnboardingGuide from '@/components/OnboardingGuide';
+import SaveStatusWrapper from '@/components/SaveStatus/SaveStatusWrapper';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -34,11 +35,16 @@ export default function RootLayout({
         <ToastProvider>
           <ThemeProvider>
             <GameProvider>
-              <Header />
-              <main className="min-h-screen">
-                {children}
-              </main>
-              <OnboardingGuide />
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+                <div className="fixed bottom-20 right-4 z-40">
+                  <SaveStatusWrapper />
+                </div>
+                <Header />
+                <main className="min-h-screen">
+                  {children}
+                </main>
+                <OnboardingGuide />
+              </div>
             </GameProvider>
           </ThemeProvider>
           <ToastContainer />
