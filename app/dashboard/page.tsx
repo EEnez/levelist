@@ -2,8 +2,9 @@
 
 import { useGames } from '@/contexts/GameContext';
 import { GameStatus } from '@/types';
-import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
-import { getStatusLabel, getStatusColor } from '@/utils/gameUtils';
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { getStatusLabel } from '@/utils/gameUtils';
+import Link from 'next/link';
 
 export default function DashboardPage() {
   const { games } = useGames();
@@ -35,6 +36,35 @@ export default function DashboardPage() {
     ? games.filter(game => game.rating).reduce((sum, game) => sum + (game.rating || 0), 0) / games.filter(game => game.rating).length
     : 0;
   const completionRate = totalGames > 0 ? (completedGames / totalGames) * 100 : 0;
+
+  // Gaming trends - Games completed over time (last 12 months)
+  const getMonthsData = () => {
+    const months = [];
+    const now = new Date();
+    
+    for (let i = 11; i >= 0; i--) {
+      const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+      const monthName = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+      
+      const completedInMonth = games.filter(game => {
+        if (game.status !== GameStatus.COMPLETED || !game.completionDate) return false;
+        const completionDate = new Date(game.completionDate);
+        return completionDate.getFullYear() === date.getFullYear() && 
+               completionDate.getMonth() === date.getMonth();
+      }).length;
+
+      months.push({
+        month: monthName,
+        completed: completedInMonth,
+        monthKey
+      });
+    }
+    
+    return months;
+  };
+
+  const monthlyData = getMonthsData();
 
   // Genre statistics
   const genreStats = games.reduce((acc, game) => {
@@ -70,7 +100,7 @@ export default function DashboardPage() {
     })
     .slice(0, 5);
 
-  const CustomTooltip = ({ active, payload }: any) => {
+  const CustomTooltip = ({ active, payload }: { active?: boolean; payload?: Array<{ payload: { name: string }; value: number }> }) => {
     if (active && payload && payload.length) {
       const data = payload[0];
       return (
@@ -80,6 +110,22 @@ export default function DashboardPage() {
           </p>
           <p className="text-sm text-gray-600 dark:text-gray-400">
             {data.value} games ({((data.value / games.length) * 100).toFixed(1)}%)
+          </p>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const LineTooltip = ({ active, payload, label }: { active?: boolean; payload?: Array<{ value: number }>; label?: string }) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="bg-white dark:bg-gray-800 p-3 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+          <p className="font-medium text-gray-900 dark:text-white">
+            {label}
+          </p>
+          <p className="text-sm text-purple-600 dark:text-purple-400">
+            {payload[0].value} games completed
           </p>
         </div>
       );
@@ -111,12 +157,12 @@ export default function DashboardPage() {
           <p className="text-gray-600 dark:text-gray-400 mb-6">
             Add some games to your library to see analytics and insights.
           </p>
-          <a
+          <Link
             href="/games/add"
             className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
           >
             Add Your First Game
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="space-y-8">
@@ -159,6 +205,40 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Gaming Trends */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              Gaming Trends - Completed Games Over Time
+            </h2>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyData}>
+                  <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
+                  <XAxis 
+                    dataKey="month" 
+                    tick={{ fontSize: 12 }}
+                    className="text-gray-600 dark:text-gray-400"
+                  />
+                  <YAxis 
+                    tick={{ fontSize: 12 }}
+                    className="text-gray-600 dark:text-gray-400"
+                  />
+                  <Tooltip content={<LineTooltip />} />
+                  <Line 
+                    type="monotone" 
+                    dataKey="completed" 
+                    stroke="#8B5CF6" 
+                    strokeWidth={3}
+                    dot={{ fill: '#8B5CF6', strokeWidth: 2, r: 4 }}
+                    activeDot={{ r: 6, stroke: '#8B5CF6', strokeWidth: 2 }}
+                    animationBegin={0}
+                    animationDuration={1500}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
             {/* Games by Status Pie Chart */}
             <div className="xl:col-span-1 bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
@@ -189,7 +269,7 @@ export default function DashboardPage() {
                     <Legend 
                       verticalAlign="bottom" 
                       height={36}
-                      formatter={(value, entry) => (
+                      formatter={(value) => (
                         <span className="text-sm text-gray-700 dark:text-gray-300">
                           {value}
                         </span>
