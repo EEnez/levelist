@@ -1,15 +1,15 @@
 'use client';
 
-import { useState } from 'react';
-import EnhancedGameCard from '@/components/GameCard/EnhancedGameCard';
+import { useState, useMemo } from 'react';
 import { GameGridSkeleton, PageHeaderSkeleton } from '@/components/Skeletons/SkeletonLoader';
-import { FadeInContainer, AnimatedList, AnimatedListItem } from '@/components/Animations/AnimatedLayout';
+import { FadeInContainer } from '@/components/Animations/AnimatedLayout';
 import { useGames } from '@/contexts/GameContext';
 import { GameStatus, Genre, Game } from '@/types';
 import Link from 'next/link';
 import { useToastHelpers } from '@/hooks/useToastHelpers';
 import SmartSearchInput from '@/components/SmartSearch/SmartSearchInput';
 import ImportExportButton from '@/components/ImportExport/ImportExportButton';
+import { SimpleGameGrid } from '@/components/GameGrid/SimpleGameGrid';
 
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
@@ -18,6 +18,17 @@ export default function GamesPage() {
   const [selectedStatus, setSelectedStatus] = useState<GameStatus | 'all'>('all');
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
+
+  // Memoized filter calculations
+  const statusFilteredGames = useMemo(() => {
+    if (selectedStatus === 'all') return games;
+    return games.filter(game => game.status === selectedStatus);
+  }, [games, selectedStatus]);
+
+  const genreFilteredGames = useMemo(() => {
+    if (selectedGenre === 'all') return statusFilteredGames;
+    return statusFilteredGames.filter(game => game.genres.includes(selectedGenre));
+  }, [statusFilteredGames, selectedGenre]);
 
   const clearSampleData = () => {
     const sampleTitles = [
@@ -105,7 +116,7 @@ export default function GamesPage() {
     setFilteredGames(searchFilteredGames);
   };
 
-  const displayGames = filteredGames.length > 0 || filteredGames.length === 0 ? filteredGames : games;
+  const displayGames = filteredGames.length > 0 || filteredGames.length === 0 ? filteredGames : genreFilteredGames;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -204,100 +215,47 @@ export default function GamesPage() {
                 <option value="all">All genres</option>
                 {allGenres.map((genre) => (
                   <option key={genre} value={genre}>
-                    {genre}
+                    {genre.charAt(0).toUpperCase() + genre.slice(1).replace('_', ' ')}
                   </option>
                 ))}
               </select>
             </div>
           </div>
-
-          {(selectedStatus !== 'all' || selectedGenre !== 'all') && (
-            <div className="mt-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">Active filters:</span>
-                <button
-                  onClick={() => {
-                    setSelectedStatus('all');
-                    setSelectedGenre('all');
-                  }}
-                  className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline touch-manipulation"
-                >
-                  Clear all
-                </button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {selectedStatus !== 'all' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200">
-                    Status: {selectedStatus}
-                    <button
-                      onClick={() => setSelectedStatus('all')}
-                      className="ml-2 text-blue-600 hover:text-blue-800 dark:text-blue-300 dark:hover:text-blue-100 touch-manipulation"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-                {selectedGenre !== 'all' && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Genre: {selectedGenre}
-                    <button
-                      onClick={() => setSelectedGenre('all')}
-                      className="ml-2 text-green-600 hover:text-green-800 dark:text-green-300 dark:hover:text-green-100 touch-manipulation"
-                    >
-                      ×
-                    </button>
-                  </span>
-                )}
-              </div>
-            </div>
-          )}
         </div>
       </FadeInContainer>
 
+      {/* Games Grid */}
       <FadeInContainer delay={0.2}>
-        <div className="mb-4">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
-            {displayGames.length} game{displayGames.length !== 1 ? 's' : ''} found
-          </p>
-        </div>
-      </FadeInContainer>
-
-      {displayGames.length > 0 ? (
-        <AnimatedList 
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 sm:gap-4 md:gap-6"
-          staggerDelay={0.05}
-        >
-          {displayGames.map((game, index) => (
-            <AnimatedListItem key={game.id}>
-              <EnhancedGameCard game={game} index={index} />
-            </AnimatedListItem>
-          ))}
-        </AnimatedList>
-      ) : (
-        <FadeInContainer delay={0.3}>
-          <div className="text-center py-8 md:py-12">
-            <div className="text-gray-400 dark:text-gray-500 mb-4">
-              <svg className="mx-auto h-8 w-8 md:h-12 md:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0112 15c-2.34 0-4.47-.881-6.08-2.33" />
+        {displayGames.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-gray-400 mb-4">
+              <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </div>
-            <h3 className="text-base md:text-lg font-medium text-gray-900 dark:text-white mb-2">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No games found
             </h3>
-            <p className="text-sm md:text-base text-gray-600 dark:text-gray-400 mb-4 md:mb-6 px-4">
-              {games.length === 0 
-                ? "Your collection is empty. Start by adding your first game!"
-                : "No games match your search criteria. Try adjusting your filters."
-              }
+            <p className="text-gray-600 dark:text-gray-400 mb-6">
+              Try adjusting your filters or add some games to your collection
             </p>
-            {games.length === 0 && (
-              <Link href="/games/add" className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 md:px-6 md:py-3 rounded-lg font-medium transition-colors touch-manipulation">
-                Add Game
-              </Link>
-            )}
+            <Link
+              href="/games/add"
+              className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Add Your First Game
+            </Link>
           </div>
-        </FadeInContainer>
-      )}
+        ) : (
+          <SimpleGameGrid
+            games={displayGames}
+            isLoading={isLoading}
+          />
+        )}
+      </FadeInContainer>
     </div>
   );
 } 

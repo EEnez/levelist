@@ -10,6 +10,11 @@ interface AnimatedLayoutProps {
   className?: string;
 }
 
+interface AnimatedListItemProps {
+  children: ReactNode;
+  className?: string;
+}
+
 export default function AnimatedLayout({ 
   children, 
   showAnimation = true, 
@@ -34,7 +39,7 @@ export default function AnimatedLayout({
   );
 }
 
-// Composant pour animer l'apparition de listes
+// Component for animating list appearance
 export function AnimatedList({ 
   children, 
   className = '',
@@ -62,14 +67,8 @@ export function AnimatedList({
   );
 }
 
-// Item de liste animé
-export function AnimatedListItem({ 
-  children, 
-  className = ''
-}: { 
-  children: ReactNode;
-  className?: string;
-}) {
+// Animated list item
+export function AnimatedListItem({ children, className = '' }: AnimatedListItemProps) {
   return (
     <motion.div
       className={className}
@@ -95,7 +94,7 @@ export function AnimatedListItem({
   );
 }
 
-// Conteneur avec animation de fade-in
+// Container with fade-in animation
 export function FadeInContainer({ 
   children, 
   className = '',
@@ -121,7 +120,7 @@ export function FadeInContainer({
   );
 }
 
-// Conteneur avec animation de slide-in
+// Container with slide-in animation
 export function SlideInContainer({ 
   children, 
   className = '',

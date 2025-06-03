@@ -53,8 +53,8 @@ export default function PageTransition({ children, className = '' }: PageTransit
   );
 }
 
-// Hook pour les animations personnalisées
-export const usePageAnimation = () => {
+// Hook for custom animations
+export function usePageTransition() {
   return {
     fadeIn: {
       initial: { opacity: 0, y: 20 },
@@ -79,4 +79,4 @@ export const usePageAnimation = () => {
       transition: { duration: 0.3 }
     }
   };
-}; 
+} 
