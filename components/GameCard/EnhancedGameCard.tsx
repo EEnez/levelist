@@ -202,7 +202,7 @@ export default function EnhancedGameCard({
         )}
 
         <Image
-          src={game.coverImageUrl || '/placeholder-game.jpg'}
+          src={game.coverImageUrl || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iNDAwIiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0xMzAgMTcwSDE3MFYyMTBIMTMwVjE3MFoiIGZpbGw9IiM5Q0EzQUYiLz4KPHA+dGggZD0iTTE0MCAyMjBIMTYwVjI0MEgxNDBWMjIwWiIgZmlsbD0iIzlDQTNBRiIvPgo8dGV4dCB4PSIxNTAiIHk9IjI3MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzlDQTNBRiIgZm9udC1mYW1pbHk9InN5c3RlbS11aSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9IjUwMCI+Tm8gSW1hZ2U8L3RleHQ+Cjwvc3ZnPgo='}
           alt={game.title}
           fill
           className="object-cover transition-all duration-300"

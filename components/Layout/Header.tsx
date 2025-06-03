@@ -13,8 +13,8 @@ export default function Header() {
   const navigation = [
     { name: 'Home', href: '/' },
     { name: 'My Collection', href: '/games' },
+    { name: 'Dashboard', href: '/dashboard' },
     { name: 'Add Game', href: '/games/add' },
-    { name: 'Statistics', href: '/statistics' },
   ];
 
   // Close menu when clicking outside
