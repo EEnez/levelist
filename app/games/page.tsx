@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import EnhancedGameCard from '@/components/GameCard/EnhancedGameCard';
 import { GameGridSkeleton, PageHeaderSkeleton } from '@/components/Skeletons/SkeletonLoader';
 import { FadeInContainer, AnimatedList, AnimatedListItem } from '@/components/Animations/AnimatedLayout';
@@ -9,6 +9,7 @@ import { GameStatus, Genre, Game } from '@/types';
 import Link from 'next/link';
 import { useToastHelpers } from '@/hooks/useToastHelpers';
 import SmartSearchInput from '@/components/SmartSearch/SmartSearchInput';
+import ImportExportButton from '@/components/ImportExport/ImportExportButton';
 
 export default function GamesPage() {
   const { games, isLoading, error } = useGames();
@@ -17,41 +18,6 @@ export default function GamesPage() {
   const [selectedStatus, setSelectedStatus] = useState<GameStatus | 'all'>('all');
   const [selectedGenre, setSelectedGenre] = useState<Genre | 'all'>('all');
   const [filteredGames, setFilteredGames] = useState<Game[]>([]);
-
-  const exportData = () => {
-    const dataStr = JSON.stringify(games, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileDefaultName = `levelist-games-${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-  };
-
-  const importData = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      try {
-        const importedGames = JSON.parse(e.target?.result as string);
-        if (Array.isArray(importedGames)) {
-          localStorage.setItem('levelist-games', JSON.stringify(importedGames));
-          window.location.reload();
-        } else {
-          alert('Invalid file format. Please select a valid JSON file.');
-        }
-      } catch {
-        alert('Error reading file. Please make sure it\'s a valid JSON file.');
-      }
-    };
-    reader.readAsText(file);
-    
-    event.target.value = '';
-  };
 
   const clearSampleData = () => {
     const sampleTitles = [
@@ -155,23 +121,10 @@ export default function GamesPage() {
           </div>
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-3">
             <div className="flex gap-2">
-              <button
-                onClick={exportData}
-                className="flex-1 sm:flex-none bg-green-600 hover:bg-green-700 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 touch-manipulation shadow-sm hover:shadow-md"
-              >
-                <span className="text-base">📤</span>
-                <span className="hidden xs:inline">Export</span>
-              </button>
-              <label className="flex-1 sm:flex-none bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 md:px-4 md:py-2 rounded-lg font-medium transition-colors cursor-pointer flex items-center justify-center gap-2 touch-manipulation shadow-sm hover:shadow-md">
-                <span className="text-base">📥</span>
-                <span className="hidden xs:inline">Import</span>
-                <input
-                  type="file"
-                  accept=".json"
-                  onChange={importData}
-                  className="hidden"
-                />
-              </label>
+              <ImportExportButton 
+                variant="default"
+                className="flex-1 sm:flex-none"
+              />
               {hasSampleData && (
                 <button
                   onClick={clearSampleData}

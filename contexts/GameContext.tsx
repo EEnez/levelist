@@ -18,11 +18,13 @@ type GameAction =
   | { type: 'SET_ERROR'; payload: string | null }
   | { type: 'LOAD_GAMES'; payload: Game[] }
   | { type: 'ADD_GAME'; payload: Game }
+  | { type: 'ADD_BULK_GAMES'; payload: Game[] }
   | { type: 'UPDATE_GAME'; payload: Game }
   | { type: 'DELETE_GAME'; payload: string };
 
 interface GameContextType extends GameState {
   addGame: (gameData: GameFormData) => Promise<void>;
+  addBulkGames: (games: Game[]) => Promise<void>;
   updateGame: (id: string, gameData: GameFormData) => Promise<void>;
   deleteGame: (id: string) => Promise<void>;
   getGameById: (id: string) => Game | undefined;
@@ -49,6 +51,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, games: action.payload, isLoading: false };
     case 'ADD_GAME':
       return { ...state, games: [...state.games, action.payload] };
+    case 'ADD_BULK_GAMES':
+      return { ...state, games: [...state.games, ...action.payload] };
     case 'UPDATE_GAME':
       return {
         ...state,
@@ -178,6 +182,31 @@ export function GameProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const addBulkGames = async (games: Game[]): Promise<void> => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      dispatch({ type: 'SET_ERROR', payload: null });
+
+      // Ensure each imported game has proper IDs and timestamps
+      const newGames = games.map(game => ({
+        ...game,
+        id: game.id || generateId(),
+        createdAt: game.createdAt || new Date(),
+        updatedAt: new Date(),
+      }));
+      
+      dispatch({ type: 'ADD_BULK_GAMES', payload: newGames });
+      
+      toast.success('Jeux ajoutés !', `${games.length} jeux ont été ajoutés à votre collection.`);
+    } catch (error) {
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to add games' });
+      toast.error('Échec de l\'ajout', 'Veuillez réessayer.');
+      throw error;
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
   const updateGame = async (id: string, gameData: GameFormData): Promise<void> => {
     try {
       dispatch({ type: 'SET_LOADING', payload: true });
@@ -223,6 +252,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const value: GameContextType = {
     ...state,
     addGame,
+    addBulkGames,
     updateGame,
     deleteGame,
     getGameById,

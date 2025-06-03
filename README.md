@@ -208,10 +208,10 @@ This project is for personal use. Feel free to fork and adapt for your own needs
 
 ## 🙏 Acknowledgments
 
-- **Next.js Team** for the amazing framework
-- **Tailwind CSS** for the utility-first styling
-- **TypeScript** for type safety
-- **Gaming Community** for inspiration
+- **Next.js Team**
+- **Tailwind CSS**
+- **TypeScript**
+- **Gaming Community**
 
 ---
 
