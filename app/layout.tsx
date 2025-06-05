@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from 'next/font/google';
 import "./globals.css";
 import Header from "@/components/Layout/Header";
+import Footer from "@/components/Layout/Footer";
 import ThemeProvider from "@/components/ThemeProvider/ThemeProvider";
 import { GameProvider } from "@/contexts/GameContext";
 import { ToastProvider } from "@/contexts/ToastContext";
@@ -35,14 +36,15 @@ export default function RootLayout({
         <ToastProvider>
           <ThemeProvider>
             <GameProvider>
-              <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+              <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col">
                 <div className="fixed bottom-20 right-4 z-40">
                   <SaveStatusWrapper />
                 </div>
                 <Header />
-                <main className="min-h-screen">
+                <main className="flex-1">
                   {children}
                 </main>
+                <Footer />
                 <OnboardingGuide />
               </div>
             </GameProvider>

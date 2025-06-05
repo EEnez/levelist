@@ -6,9 +6,6 @@ import { Game } from '@/types';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { getStatusColor, getStatusLabel } from '@/utils/gameUtils';
-import { useGames } from '@/contexts/GameContext';
-import { useToastHelpers } from '@/hooks/useToastHelpers';
-import QuickActionsOverlay from '@/components/QuickActions/QuickActionsOverlay';
 
 interface EnhancedGameCardProps {
   game: Game;
@@ -22,22 +19,15 @@ export default function EnhancedGameCard({
   onEdit 
 }: EnhancedGameCardProps) {
   const router = useRouter();
-  const { updateGame } = useGames();
-  const toast = useToastHelpers();
   
   const [isHovered, setIsHovered] = useState(false);
   const [isTouched, setIsTouched] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
   
   const touchStartRef = useRef<{ x: number; y: number; time: number } | null>(null);
-  const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const touchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const handleCardClick = () => {
-    if (!showQuickActions) {
-      router.push(`/games/${game.id}`);
-    }
+    router.push(`/games/${game.id}`);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -49,45 +39,12 @@ export default function EnhancedGameCard({
     }
   };
 
-  const handleStatusChange = async (newStatus: typeof game.status) => {
-    try {
-      const gameFormData = {
-        title: game.title,
-        description: game.description || '',
-        genres: game.genres,
-        platforms: game.platforms,
-        status: newStatus,
-        rating: game.rating,
-        hoursPlayed: game.hoursPlayed,
-        completionDate: game.completionDate?.toISOString().split('T')[0],
-        notes: game.notes,
-        coverImageUrl: game.coverImageUrl,
-        releaseDate: game.releaseDate?.toISOString().split('T')[0],
-        developer: game.developer,
-        publisher: game.publisher,
-        startDate: game.startDate?.toISOString().split('T')[0],
-      };
-      
-      await updateGame(game.id, gameFormData);
-      toast.success('Status Updated', `${game.title} marked as ${getStatusLabel(newStatus).toLowerCase()}`);
-    } catch {
-      toast.error('Update Failed', 'Could not update game status. Please try again.');
-    }
-  };
-
   const handleMouseEnter = () => {
     setIsHovered(true);
-    hoverTimeoutRef.current = setTimeout(() => {
-      setShowQuickActions(true);
-    }, 300);
   };
 
   const handleMouseLeave = () => {
     setIsHovered(false);
-    if (hoverTimeoutRef.current) {
-      clearTimeout(hoverTimeoutRef.current);
-    }
-    setShowQuickActions(false);
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -98,28 +55,12 @@ export default function EnhancedGameCard({
       time: Date.now()
     };
     setIsTouched(true);
-    
-    touchTimeoutRef.current = setTimeout(() => {
-      if (touchStartRef.current) {
-        setShowQuickActions(true);
-        if (navigator.vibrate) {
-          navigator.vibrate([10]);
-        }
-      }
-    }, 500);
   };
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     setIsTouched(false);
     
-    if (touchTimeoutRef.current) {
-      clearTimeout(touchTimeoutRef.current);
-    }
-    
-    if (!touchStartRef.current || showQuickActions) {
-      touchStartRef.current = null;
-      return;
-    }
+    if (!touchStartRef.current) return;
 
     const touch = e.changedTouches[0];
     const deltaX = touch.clientX - touchStartRef.current.x;
@@ -137,9 +78,6 @@ export default function EnhancedGameCard({
 
   const handleTouchCancel = () => {
     setIsTouched(false);
-    if (touchTimeoutRef.current) {
-      clearTimeout(touchTimeoutRef.current);
-    }
     touchStartRef.current = null;
   };
 
@@ -182,20 +120,11 @@ export default function EnhancedGameCard({
       onTouchEnd={handleTouchEnd}
       onTouchCancel={handleTouchCancel}
       className={`group relative bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden border-2 transition-all duration-200 cursor-pointer select-none ${
-        isHovered || showQuickActions
-          ? 'border-gray-300 dark:border-gray-600 shadow-lg' 
-          : 'border-gray-200 dark:border-gray-700'
+        isHovered ? 'border-gray-300 dark:border-gray-600 shadow-lg' : 'border-gray-200 dark:border-gray-700'
       } ${
         isTouched ? 'scale-95 shadow-lg' : ''
       }`}
     >
-      <QuickActionsOverlay
-        isVisible={showQuickActions}
-        currentStatus={game.status}
-        onStatusChange={handleStatusChange}
-        onClose={() => setShowQuickActions(false)}
-      />
-
       <div className="relative aspect-[3/4] overflow-hidden">
         {!imageLoaded && (
           <div className="absolute inset-0 bg-gray-200 dark:bg-gray-700 animate-pulse" />
@@ -212,10 +141,11 @@ export default function EnhancedGameCard({
         
         <div 
           className={`absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent transition-opacity duration-200 ${
-            isHovered || isTouched || showQuickActions ? 'opacity-100' : 'opacity-0'
+            isHovered || isTouched ? 'opacity-100' : 'opacity-0'
           }`}
         />
 
+        {/* Status Badge - Read-only display */}
         <div className="absolute top-2 right-2">
           <span className={`px-2 py-1 text-xs font-medium rounded-full shadow-sm backdrop-blur-sm ${getStatusColor(game.status)}`}>
             {getStatusLabel(game.status)}

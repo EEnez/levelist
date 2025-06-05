@@ -70,40 +70,6 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
     touchStartRef.current = null;
   };
 
-  const getStatusColor = (status: GameStatus): string => {
-    switch (status) {
-      case GameStatus.COMPLETED:
-        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300 border-green-200 dark:border-green-700';
-      case GameStatus.CURRENTLY_PLAYING:
-        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-700';
-      case GameStatus.WANT_TO_PLAY:
-        return 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 border-yellow-200 dark:border-yellow-700';
-      case GameStatus.ON_HOLD:
-        return 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300 border-orange-200 dark:border-orange-700';
-      case GameStatus.DROPPED:
-        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300 border-red-200 dark:border-red-700';
-      default:
-        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-600';
-    }
-  };
-
-  const getStatusLabel = (status: GameStatus): string => {
-    switch (status) {
-      case GameStatus.COMPLETED:
-        return 'Completed';
-      case GameStatus.CURRENTLY_PLAYING:
-        return 'Playing';
-      case GameStatus.WANT_TO_PLAY:
-        return 'Want to Play';
-      case GameStatus.ON_HOLD:
-        return 'On Hold';
-      case GameStatus.DROPPED:
-        return 'Dropped';
-      default:
-        return status;
-    }
-  };
-
   const formatGenres = (genres: Genre[]): string => {
     return genres.slice(0, 2).map(genre => 
       genre.charAt(0).toUpperCase() + genre.slice(1).replace('_', ' ')
@@ -162,22 +128,6 @@ export default function GameCard({ game, onEdit, onDelete }: GameCardProps) {
         <div className={`absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
           isTouched ? 'opacity-100' : ''
         }`}></div>
-
-        {/* Status Badge - Larger touch target on mobile */}
-        <div className="absolute top-2 left-2 md:top-3 md:left-3 transform transition-all duration-300 group-hover:scale-105">
-          <span className={`inline-flex items-center px-2 py-1 md:px-2.5 md:py-1.5 rounded-full text-xs font-medium backdrop-blur-sm ${getStatusColor(game.status)} shadow-sm group-hover:shadow-md transition-shadow duration-300`}>
-            {getStatusLabel(game.status)}
-          </span>
-        </div>
-
-        {/* Rating Badge - Responsive sizing */}
-        {game.rating && (
-          <div className="absolute top-2 right-2 md:top-3 md:right-3 transform transition-all duration-300 group-hover:scale-105">
-            <span className="inline-flex items-center px-2 py-1 md:px-2.5 md:py-1.5 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm shadow-sm group-hover:shadow-md group-hover:bg-black/80 transition-all duration-300">
-              ⭐ {game.rating}/10
-            </span>
-          </div>
-        )}
 
         {/* Action Buttons - Always visible on mobile, hover on desktop */}
         <div className="absolute bottom-2 right-2 md:bottom-3 md:right-3 flex space-x-2 md:opacity-0 md:group-hover:opacity-100 transition-all duration-300 transform md:translate-y-2 md:group-hover:translate-y-0">
