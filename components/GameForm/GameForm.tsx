@@ -360,8 +360,8 @@ export default function GameForm({ game, onSubmit, onCancel, isLoading = false }
 
       {/* Notes */}
       <div>
-        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2">
-          Personal Notes
+        <label htmlFor="notes" className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
+          <span role="img" aria-label="memory">💬</span> Memory (Anecdote)
         </label>
         <textarea
           id="notes"
@@ -369,8 +369,11 @@ export default function GameForm({ game, onSubmit, onCancel, isLoading = false }
           value={formData.notes}
           onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
           className="block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-          placeholder="Your thoughts, comments..."
+          placeholder="What made this game special for you? A memory, a story, a feeling..."
         />
+        <p className="mt-1 text-xs text-gray-500 italic">
+          Share an anecdote, a memory, or why this game matters to you. This is your personal gaming journal!
+        </p>
       </div>
 
       {/* Form Actions */}

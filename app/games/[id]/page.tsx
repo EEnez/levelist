@@ -164,6 +164,22 @@ export default function GameDetailPage({ params }: GameDetailPageProps) {
               </div>
             )}
 
+            {/* Memory / Anecdote */}
+            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-blue-200 dark:border-blue-700">
+              <h2 className="text-xl font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center gap-2">
+                <span role="img" aria-label="memory">💬</span> My Memory
+              </h2>
+              {game.notes && game.notes.trim() !== '' ? (
+                <p className="text-gray-700 dark:text-gray-200 leading-relaxed italic">
+                  {game.notes}
+                </p>
+              ) : (
+                <p className="text-gray-400 dark:text-gray-500 italic">
+                  No memory yet. Add one to make this game special!
+                </p>
+              )}
+            </div>
+
             {/* Genres & Platforms */}
             <div className="bg-white dark:bg-gray-800 rounded-lg p-6 shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

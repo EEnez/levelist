@@ -54,14 +54,11 @@ export default function ImportExportModal({
       
       downloadFile(content, filename, mimeType);
       
-      toast.success(
-        'Export réussi !', 
-        `${games.length} jeux exportés au format ${exportOptions.format.toUpperCase()}`
-      );
+      toast.success('Export successful!', `${games.length} games exported as ${exportOptions.format.toUpperCase()}`);
       
       onClose();
     } catch {
-      toast.error('Erreur d&apos;export', 'Impossible d&apos;exporter les données');
+      toast.error('Export error', 'Unable to export data');
     } finally {
       setIsProcessing(false);
     }
@@ -80,10 +77,7 @@ export default function ImportExportModal({
         // Actually add the imported games using the context
         await addBulkGames(result.imported);
         
-        toast.success(
-          'Import réussi !',
-          `${result.imported.length} jeux importés, ${result.duplicates} doublons ignorés`
-        );
+        toast.success('Import successful!', `${result.imported.length} games imported, ${result.duplicates} duplicates ignored`);
         
         // Close modal after successful import
         setTimeout(() => {
@@ -91,10 +85,10 @@ export default function ImportExportModal({
           window.location.reload(); // Refresh to show imported games
         }, 2000);
       } else {
-        toast.error('Erreur d&apos;import', result.errors[0] || 'Format invalide');
+        toast.error('Import error', result.errors[0] || 'Invalid format');
       }
     } catch {
-      toast.error('Erreur d&apos;import', 'Impossible de lire le fichier');
+      toast.error('Import error', 'Unable to read file');
     } finally {
       setIsProcessing(false);
     }
@@ -128,10 +122,10 @@ export default function ImportExportModal({
   };
 
   const formatOptions = [
-    { value: ExportFormat.JSON, label: 'JSON', description: 'Format standard, complet' },
-    { value: ExportFormat.CSV, label: 'CSV', description: 'Compatible Excel/Sheets' },
-    { value: ExportFormat.STEAM, label: 'Steam', description: 'Format Steam Library' },
-    { value: ExportFormat.BACKUP, label: 'Backup', description: 'Sauvegarde complète' },
+    { value: ExportFormat.JSON, label: 'JSON', description: 'Standard format, complete' },
+    { value: ExportFormat.CSV, label: 'CSV', description: 'Compatible with Excel/Sheets' },
+    { value: ExportFormat.STEAM, label: 'Steam', description: 'Steam Library format' },
+    { value: ExportFormat.BACKUP, label: 'Backup', description: 'Full backup' },
   ];
 
   if (!isOpen) return null;
@@ -200,7 +194,7 @@ export default function ImportExportModal({
                 {/* Format Selection */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Format d&apos;export
+                    Export format
                   </label>
                   <div className="grid grid-cols-2 gap-3">
                     {formatOptions.map((format) => (
@@ -227,7 +221,7 @@ export default function ImportExportModal({
                 {/* Export Options */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Options d&apos;export
+                    Export options
                   </label>
                   <div className="space-y-3">
                     <label className="flex items-center">
@@ -241,7 +235,7 @@ export default function ImportExportModal({
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
                       <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                        Inclure les métadonnées (développeur, éditeur, dates)
+                        Include metadata (developer, publisher, dates)
                       </span>
                     </label>
                     
@@ -256,7 +250,7 @@ export default function ImportExportModal({
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
                       <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                        Inclure les notes personnelles
+                        Include personal notes
                       </span>
                     </label>
                     
@@ -271,7 +265,7 @@ export default function ImportExportModal({
                         className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
                       />
                       <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                        Inclure les évaluations et temps de jeu
+                        Include ratings and playtime
                       </span>
                     </label>
                   </div>
@@ -280,7 +274,7 @@ export default function ImportExportModal({
                 {/* Summary */}
                 <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                   <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <div>📊 {games.length} jeux seront exportés</div>
+                    <div>📊 {games.length} games will be exported</div>
                     <div>📁 Format: {exportOptions.format.toUpperCase()}</div>
                   </div>
                 </div>
@@ -290,7 +284,7 @@ export default function ImportExportModal({
                 {/* Format Selection for Import */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                    Format d&apos;import
+                    Import format
                   </label>
                   <select
                     value={importFormat}
@@ -320,10 +314,10 @@ export default function ImportExportModal({
                     <div className="text-4xl">📁</div>
                     <div>
                       <div className="text-lg font-medium text-gray-900 dark:text-white">
-                        Glissez votre fichier ici
+                        Drag and drop your file here
                       </div>
                       <div className="text-sm text-gray-500 dark:text-gray-400">
-                        ou cliquez pour sélectionner
+                        or click to select
                       </div>
                     </div>
                     <div className="flex gap-2 justify-center">
@@ -331,14 +325,14 @@ export default function ImportExportModal({
                         onClick={() => fileInputRef.current?.click()}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
                       >
-                        Choisir un fichier
+                        Choose a file
                       </button>
                       <button
                         onClick={() => downloadSampleFile(importFormat as 'json' | 'csv' | 'steam' | 'backup')}
                         className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
-                        title="Télécharger un fichier d&apos;exemple pour tester l&apos;import"
+                        title="Download a sample file to test import"
                       >
-                        📥 Exemple
+                        📥 Example
                       </button>
                     </div>
                     <input
@@ -360,19 +354,19 @@ export default function ImportExportModal({
                   >
                     <div className="space-y-2 text-sm">
                       <div className="font-medium text-gray-900 dark:text-white">
-                        Résultat de l&apos;import:
+                        Import result:
                       </div>
                       <div className="text-green-600 dark:text-green-400">
-                        ✅ {importResult.imported.length} jeux importés
+                        ✅ {importResult.imported.length} games imported
                       </div>
                       {importResult.duplicates > 0 && (
                         <div className="text-yellow-600 dark:text-yellow-400">
-                          ⚠️ {importResult.duplicates} doublons ignorés
+                          ⚠️ {importResult.duplicates} duplicates ignored
                         </div>
                       )}
                       {importResult.errors.length > 0 && (
                         <div className="text-red-600 dark:text-red-400">
-                          ❌ {importResult.errors.length} erreurs
+                          ❌ {importResult.errors.length} errors
                         </div>
                       )}
                     </div>
@@ -388,7 +382,7 @@ export default function ImportExportModal({
               onClick={onClose}
               className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 font-medium transition-colors"
             >
-              Annuler
+              Cancel
             </button>
             {mode === 'export' && (
               <button
@@ -399,11 +393,11 @@ export default function ImportExportModal({
                 {isProcessing ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                    Export...
+                    Exporting...
                   </>
                 ) : (
                   <>
-                    📤 Exporter
+                    📤 Export
                   </>
                 )}
               </button>

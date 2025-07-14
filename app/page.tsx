@@ -144,6 +144,30 @@ export default function Home() {
           </div>
         </div>
 
+        {/* Latest Memories Section */}
+        {games.filter(game => game.notes && game.notes.trim() !== '').length > 0 && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-blue-700 dark:text-blue-300 mb-4 flex items-center gap-2">
+              <span role="img" aria-label="memory">💬</span> Your Latest Memories
+            </h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {games
+                .filter(game => game.notes && game.notes.trim() !== '')
+                .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())
+                .slice(0, 4)
+                .map(game => (
+                  <div key={game.id} className="bg-white dark:bg-gray-800 rounded-lg p-4 shadow border border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-blue-600 dark:text-blue-400">🎮</span>
+                      <span className="font-semibold text-gray-900 dark:text-white">{game.title}</span>
+                    </div>
+                    <p className="text-gray-700 dark:text-gray-200 italic">{game.notes}</p>
+                  </div>
+                ))}
+            </div>
+          </div>
+        )}
+
         {recentGames.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">

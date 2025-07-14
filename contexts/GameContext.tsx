@@ -197,10 +197,10 @@ export function GameProvider({ children }: { children: ReactNode }) {
       
       dispatch({ type: 'ADD_BULK_GAMES', payload: newGames });
       
-      toast.success('Jeux ajoutés !', `${games.length} jeux ont été ajoutés à votre collection.`);
+      toast.success('Games added!', `${games.length} games have been added to your collection.`);
     } catch (error) {
       dispatch({ type: 'SET_ERROR', payload: 'Failed to add games' });
-      toast.error('Échec de l\'ajout', 'Veuillez réessayer.');
+      toast.error('Failed to add', 'Please try again.');
       throw error;
     } finally {
       dispatch({ type: 'SET_LOADING', payload: false });
